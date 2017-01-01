@@ -17,6 +17,17 @@ class DisplayDriver:
         self._format = formats[screen_type]
         self._screen = None
 
+    def __draw_screen(self):
+        self._screen = pygame.display.set_mode(self._size, self._format)
+
+        if not self._screen:
+            raise AssertionError('Screen not defined')
+
+        self._screen.fill((0, 0, 0))
+        pygame.font.init()
+        pygame.mouse.set_visible(0)
+        pygame.display.update()
+
     def display_start(self):
 
         has_driver = False
@@ -28,10 +39,22 @@ class DisplayDriver:
             except pygame.error:
                 print('Driver: {} not loaded.'.format(driver))
                 continue
+            print('Driver: {} used.'.format(driver))
             has_driver = True
             break
 
         if not has_driver:
-            raise Exception('No suitable video driver found!')
+            raise Exception('No video driver available for use!')
 
-        self._screen = pygame.display.set_mode(self._size, self._format)
+        try:
+            self.__draw_screen()
+        except AssertionError as err:
+            print(str(err))
+            quit()
+
+
+# Test block.  ditch this when done building the display
+new_display = DisplayDriver()
+new_display.display_start()
+while True:
+    pygame.time.wait(100)
