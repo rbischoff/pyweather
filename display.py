@@ -1,16 +1,25 @@
 import pygame
 import os
 import time
+from system_data import SystemData
 
 DEFAULT_DRIVERS = ('fbcon', 'directfb', 'svgalib', 'Quartz')
 DEFAULT_SIZE = (1024, 600)
 DEFAULT_SCREEN = 'no_frame'
+ICON_BASE_DIR = '/icons/'
+ICON_DICTIONARY = {'weather_station': 'weather_station/weather_station.png',
+                   'sig0': 'weather_station/wifi_sig0.png',
+                   'sig1': 'weather_station/wifi_sig1.png',
+                   'sig2': 'weather_station/wifi_sig2.png',
+                   'sig3': 'weather_station/wifi_sig2.png',
+                   'sig4': 'weather_station/wifi_sig3.png'}
 
 
 class DisplayDriver:
 
     def __init__(self, drivers=DEFAULT_DRIVERS, size=DEFAULT_SIZE, screen_type=DEFAULT_SCREEN, borders=(5, 5),
-                 border_width=3, line_color=(255, 255, 255), font='freesans', font_color=(255, 255, 255)):
+                 border_width=3, line_color=(255, 255, 255), font='freesans', font_color=(255, 255, 255),
+                 icons=ICON_DICTIONARY):
         """DisplayDriver class is the class that build the base display for use in the weather
         app.  Argument descriptions: drivers is a tuple of strings with available SDL_VIDEODRIVER
         environmental varaibles; size is a tuple of two integers describing the x, y size of the
@@ -21,6 +30,7 @@ class DisplayDriver:
         formats = {'no_frame': pygame.NOFRAME, 'full_screen': pygame.FULLSCREEN, 'double_buff': pygame.DOUBLEBUF,
                    'hw_surface': pygame.HWSURFACE, 'open_GL': pygame.OPENGL, 'resizable': pygame.RESIZABLE}
 
+        self._system_data = SystemData()
         self._drivers = drivers
         self._size = size
         self._borders = borders
@@ -29,6 +39,9 @@ class DisplayDriver:
         self._font = font
         self._font_color = font_color
         self._format = formats[screen_type]
+        self._icons = icons
+        self._base_dir = os.getcwd() + ICON_BASE_DIR
+        self._scale_icons = True
         self._xmax = self._size[0] - self._borders[0]
         self._ymax = self._size[1] - self._borders[1]
         self._screen = None
@@ -129,6 +142,29 @@ class DisplayDriver:
         self._screen.blit(rtm2, (tp + tx1 + 3, tm_y_sm))
         self._screen.blit(rdt1, (dp, dt_y))
 
+    def __get_signal_icon(self):
+        sig_no = self._system_data.ws.sig_strength
+        return self._base_dir + self._icons['sig{}'.format(sig_no)]
+
+    def __display_connected(self):
+        xmin = self._borders[0]
+        ymin = self._borders[1]
+        station_scale = 0.35
+        signal_scale = 0.25
+
+        station_icon = pygame.image.load_extended(self._base_dir + self._icons['weather_station']).convert_alpha()
+        signal_icon = pygame.image.load_extended(self.__get_signal_icon()).convert_alpha()
+        (stix, stiy) = station_icon.get_size()
+        (sgix, sgiy) = signal_icon.get_size()
+
+        if self._scale_icons:
+            station_icon = pygame.transform.scale(station_icon, (int(stix * station_scale), int(stiy * station_scale)))
+            (stix, stiy) = station_icon.get_size()
+            signal_icon = pygame.transform.scale(signal_icon, (int(sgix * signal_scale), int(sgiy * signal_scale)))
+
+        self._screen.blit(station_icon, (xmin * 2, ymin))
+        self._screen.blit(signal_icon, (stix + 14, ymin + 9))
+
     def display_start(self):
         """display_start is the main initializer for the display it makes calls to many other
         internal functions in order do build the dispay as defined in the initialization of the
@@ -139,6 +175,7 @@ class DisplayDriver:
             self.__draw_screen()
             self.__draw_frames()
             self.__display_datetime()
+            self.__display_connected()
             pygame.display.update()
         except AssertionError as err:
             print(err)
