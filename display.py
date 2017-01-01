@@ -2,14 +2,14 @@ import pygame
 import os
 
 DEFAULT_DRIVERS = ('fbcon', 'directfb', 'svgalib', 'Quartz')
-DEFAULT_SIZE = (800, 400)
+DEFAULT_SIZE = (1024, 600)
 DEFAULT_SCREEN = 'no_frame'
 
 
 class DisplayDriver:
 
     def __init__(self, drivers=DEFAULT_DRIVERS, size=DEFAULT_SIZE, screen_type=DEFAULT_SCREEN, borders=(5, 5),
-                 border_width=4):
+                 border_width=3):
         """DisplayDriver class is the class that build the base display for use in the weather
         app.  Argument descriptions: drivers is a tuple of strings with available SDL_VIDEODRIVER
         environmental varaibles; size is a tuple of two integers describing the x, y size of the
@@ -61,12 +61,19 @@ class DisplayDriver:
             raise AssertionError('No video driver available for use!')
 
     def __draw_frames(self):
+        """This function should be called by the display_start function only. It renders the frames for the display"""
         xmin = self._borders[0]
         ymin = self._borders[1]
         xmax = self._size[0] - xmin
         ymax = self._size[1] - ymin
         line_width = self._border_width
         line_color = (255, 255, 255)
+
+        # Horizontal line settings
+        hz = (0.1, 0.5, 0.58)
+
+        # Vertical line settings
+        vt = (0.33, 0.66, 0.2, 0.4, 0.6, 0.8)
 
         # Draw Screen Border
         pygame.draw.line(self._screen, line_color, (xmin, xmin), (xmax, xmin), line_width)  # Top
@@ -75,11 +82,19 @@ class DisplayDriver:
         pygame.draw.line(self._screen, line_color, (xmax, ymin), (xmax, ymax), line_width)  # Right Edge
 
         # Draw Inner Frames
-        pygame.draw.line(self._screen, line_color, (xmin, ymax * 0.15), (xmax, ymax * 0.15), line_width)  # HZ 1
-        pygame.draw.line(self._screen, line_color, (xmin, ymax * 0.5), (xmax, ymax * 0.5), line_width)  # HZ 2
-        pygame.draw.line(self._screen, line_color, (xmax * 0.25, ymax * 0.5), (xmax * 0.25, ymax), line_width)  # V 1
-        pygame.draw.line(self._screen, line_color, (xmax * 0.5, ymax * 0.15), (xmax * 0.5, ymax), line_width)  # V 2
-        pygame.draw.line(self._screen, line_color, (xmax * 0.75, ymax * 0.5), (xmax * 0.75, ymax), line_width)  # V 3
+        # Horizontal lines (1, 2, 3)
+        for h in hz:
+            pygame.draw.line(self._screen, line_color, (xmin, ymax * h), (xmax, ymax * h), line_width)
+
+        # Vertical lines (1, 2)
+        for i in range(2):
+            v = vt[i]
+            pygame.draw.line(self._screen, line_color, (xmax * v, ymax * hz[2]), (xmax * v, ymax * hz[0]), line_width)
+
+        # Vertical lines (3 - 6)
+        for i in range(2, len(vt)):
+            v = vt[i]
+            pygame.draw.line(self._screen, line_color, (xmax * v, ymax), (xmax * v, ymax * hz[2]), line_width)
 
     def display_start(self):
         """display_start is the main initializer for the display it makes calls to many other
