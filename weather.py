@@ -3,7 +3,7 @@
 class WeatherStation:
     def __init__(self, ):
         self.sig_strength = 2
-
+        self._wind_directions = ['n', 's', 'e', 'w', 'ne', 'se', 'nw', 'sw']
 
 class DayForecast:
     def __init__(self):

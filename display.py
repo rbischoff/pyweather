@@ -3,11 +3,11 @@ import os
 import time
 from random import randint
 from system_data import SystemData
-from settings import ICON_BASE_DIR, ICON_DICTIONARY
+from settings import ICON_BASE_DIR, ICON_DICTIONARY, ICON_TYPES, COMPASS_DIR
 
 DEFAULT_DRIVERS = ('fbcon', 'directfb', 'svgalib', 'Quartz')
 DEFAULT_SIZE = (1024, 600)
-DEFAULT_SCREEN = 'no_frame'
+DEFAULT_SCREEN = 'resizable'
 
 
 class DisplayDriver:
@@ -69,7 +69,7 @@ class DisplayDriver:
 
         self._screen.fill((0, 0, 0))
         pygame.font.init()
-        pygame.mouse.set_visible(0)
+        # pygame.mouse.set_visible(0)
         pygame.display.update()
 
     def __draw_frames(self):
@@ -112,21 +112,22 @@ class DisplayDriver:
 
     def __display_datetime(self):
 
-        th = 0.07  # Time Text Height
-        sh = 0.03  # Seconds Text Height
-        dh = 0.06  # Date Text Height
-        tm_y = 10  # Time Y Position
-        tm_y_sm = 15  # Time & Date Y Position Small
-        dt_y = 13
+        th = 0.07     # Time Text Height
+        sh = 0.03     # Seconds Text Height
+        dh = 0.06     # Date Text Height
+        dt_y = 13  # Date Y Position
+        tm_y = 10     # Time Y Position
+        tm_y_sm = 15  # Time Y Position Small
 
         tfont = pygame.font.SysFont(self._font, int(self._ymax * th), bold=1)  # Time Font
         dfont = pygame.font.SysFont(self._font, int(self._ymax * dh), bold=1)  # Date Font
         sfont = pygame.font.SysFont(self._font, int(self._ymax * sh), bold=1)  # Small Font for Seconds
 
-        tm1 = time.strftime("%H:%M", time.localtime())  # Time
-        tm2 = time.strftime("%S", time.localtime())  # Seconds
-        dt1 = time.strftime("%d %b %y").upper()  # Date
+        tm1 = time.strftime("%H:%M", time.localtime())  # Time String
+        tm2 = time.strftime("%S", time.localtime())     # Seconds String
+        dt1 = time.strftime("%d %b %y").upper()         # Date String
 
+        # Build the Date / Time
         rtm1 = tfont.render(tm1, True, self._font_color)
         (tx1, ty1) = rtm1.get_size()
         rtm2 = sfont.render(tm2, True, self._font_color)
@@ -164,10 +165,13 @@ class DisplayDriver:
         self._screen.blit(signal_icon, (stix + 14, ymin + 9))
 
     def __display_forecasts(self):
-
+        # TODO: Maybe I'll add some form of (3, 5, 7) day forecast option
         days = 5
+
+        # TODO: make this part of self
         hz = (0.1, 0.5, 0.58)
         vt = (0.33, 0.66, 0.2, 0.4, 0.6, 0.8)
+
         vdiff = vt[4] - vt[3]
         yo = self._ymax * hz[2] + 5
         vc = 0 + vdiff / 2  # Y center
@@ -207,6 +211,33 @@ class DisplayDriver:
             self._screen.blit(temps, (self._xmax * vci - tx / 2, self._ymax - (ry + ty + (gp * 2))))
             self._screen.blit(rain, (self._xmax * vci - rx / 2, self._ymax - (ry + gp)))
 
+    def __weather_vane(self):
+
+        yc = ((self._ymax * .5 - self._ymax * .1) / 2) + (self._ymax * .1)
+        vc = 0.5 * self._xmax
+        th = 0.1
+        smth = 0.04
+
+        # TODO: Remove this tester when complete
+        wind_directions = ['n', 's', 'e', 'w', 'ne', 'se', 'nw', 'sw']
+
+        lgfont = pygame.font.SysFont(self._font, int(self._ymax * th), bold=1)
+        font = pygame.font.SysFont(self._font, int(self._ymax * smth), bold=1)
+
+        mph = font.render('mph', True, self._line_color)
+        speed = lgfont.render(str(randint(0, 100)), True, self._line_color)
+
+        icon = pygame.image.load_extended(self._base_dir +
+                                          'compass/{}_calm.png'.format(wind_directions[randint(0, 7)])).convert_alpha()
+
+        (ix, iy) = icon.get_size()
+        (sx, sy) = speed.get_size()
+        (mx, my) = mph.get_size()
+
+        self._screen.blit(speed, (vc - sx / 2, yc - sy / 2))
+        self._screen.blit(icon, (vc - ix / 2, yc - iy / 2))
+        self._screen.blit(mph, (vc - mx / 2, yc + (sy / 2) - (my / 2)))
+
     def display_start(self):
         """display_start is the main initializer for the display it makes calls to many other
         internal functions in order do build the dispay as defined in the initialization of the
@@ -219,6 +250,7 @@ class DisplayDriver:
             self.__display_datetime()
             self.__display_connected()
             self.__display_forecasts()
+            self.__weather_vane()
             pygame.display.update()
         except AssertionError as err:
             print(err)
@@ -231,6 +263,7 @@ class DisplayDriver:
             self.__display_connected()
             self.__display_connected()
             self.__display_forecasts()
+            self.__weather_vane()
             pygame.display.update()
         except AssertionError as err:
             print("Update Error + {}".format(str(err)))
