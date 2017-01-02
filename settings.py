@@ -3,6 +3,15 @@ sd = 'forecast/'  # Icon sub-directory name.
 # The forcast includes an icon index number.  Below is an ordered array that has the
 # icon filename for the icon index.
 
+ICON_BASE_DIR = '/icons/'
+ICON_DICTIONARY = {'weather_station': 'weather_station/weather_station.png',
+                   'sig0': 'weather_station/cell_sig0.png',
+                   'sig1': 'weather_station/cell_sig1.png',
+                   'sig2': 'weather_station/cell_sig2.png',
+                   'sig3': 'weather_station/cell_sig3.png',
+                   'sig4': 'weather_station/cell_sig4.png'
+                   }
+
 icons = [
     sd + 'thunderstorms.png',        # 0 - Thunderstorms
     sd + 'windy.png',                # 1 - Windy Rain

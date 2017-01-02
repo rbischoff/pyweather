@@ -1,18 +1,13 @@
 import pygame
 import os
 import time
+from random import randint
 from system_data import SystemData
+from settings import ICON_BASE_DIR, ICON_DICTIONARY
 
 DEFAULT_DRIVERS = ('fbcon', 'directfb', 'svgalib', 'Quartz')
 DEFAULT_SIZE = (1024, 600)
 DEFAULT_SCREEN = 'no_frame'
-ICON_BASE_DIR = '/icons/'
-ICON_DICTIONARY = {'weather_station': 'weather_station/weather_station.png',
-                   'sig0': 'weather_station/cell_sig0.png',
-                   'sig1': 'weather_station/cell_sig1.png',
-                   'sig2': 'weather_station/cell_sig2.png',
-                   'sig3': 'weather_station/cell_sig3.png',
-                   'sig4': 'weather_station/cell_sig4.png'}
 
 
 class DisplayDriver:
@@ -105,13 +100,14 @@ class DisplayDriver:
             pygame.draw.line(self._screen, self._line_color, (xmin, ymax * h), (xmax, ymax * h), line_width)
 
         # Vertical lines (1, 2)
-        for i in range(2):
-            v = vt[i]
-            pygame.draw.line(self._screen, self._line_color, (xmax * v, ymax * hz[2]), (xmax * v, ymax * hz[0]), line_width)
+        for j in range(2):
+            v = vt[j]
+            pygame.draw.line(self._screen, self._line_color, (xmax * v, ymax * hz[2]),
+                             (xmax * v, ymax * hz[0]), line_width)
 
         # Vertical lines (3 - 6)
-        for i in range(2, len(vt)):
-            v = vt[i]
+        for j in range(2, len(vt)):
+            v = vt[j]
             pygame.draw.line(self._screen, self._line_color, (xmax * v, ymax), (xmax * v, ymax * hz[2]), line_width)
 
     def __display_datetime(self):
@@ -169,46 +165,47 @@ class DisplayDriver:
 
     def __display_forecasts(self):
 
+        days = 5
         hz = (0.1, 0.5, 0.58)
         vt = (0.33, 0.66, 0.2, 0.4, 0.6, 0.8)
         vdiff = vt[4] - vt[3]
-        yo = self._ymax * hz[2]
+        yo = self._ymax * hz[2] + 5
         vc = 0 + vdiff / 2  # Y center
 
-        xo = 0.60                  # X offset
-        th = 0.045                 # Text Height
-        rpth = 0.08               # Rain Present Text Height
-        gp = 5                # Line Spacing Gap
-        rpl = 5.95                 # Rain percent line offset.
+        th = 0.045          # Text Height
+        rpth = 0.08         # Rain Present Text Height
+        gp = 5              # Line Spacing Gap
 
         font = pygame.font.SysFont(self._font, int(self._ymax * th), bold=1)
         lgfont = pygame.font.SysFont(self._font, int(self._ymax * rpth), bold=1)
 
-        today = self._system_data.forecasts.forecasts[0]
-        header = font.render('Today', True, self._line_color)
-        temps = font.render(today.low_temp + ' / ' + today.high_temp, True, self._line_color)
-        rain = lgfont.render(today.rain + '%', True, self._line_color)
-        icon = pygame.image.load_extended(self._base_dir + self._system_data.weather_icons[today.icon]).convert_alpha()
+        for j in range(days):
+            vci = vc + (j * vdiff)
+            today = self._system_data.forecasts.forecasts[j]
+            header = font.render(today.day, True, self._line_color)
+            temps = font.render(today.low_temp + ' / ' + today.high_temp, True, self._line_color)
+            rain = lgfont.render(today.rain + '%', True, self._line_color)
+            icon = pygame.image.load_extended(self._base_dir +
+                                              self._system_data.weather_icons[today.icon]).convert_alpha()
 
-        (hx, hy) = header.get_size()
-        (tx, ty) = temps.get_size()
-        (rx, ry) = rain.get_size()
-        (ix, iy) = icon.get_size()
-
-        if self._scale_icons:
-            icon = pygame.transform.scale(icon, (int(ix * 1.4), int(iy * 1.4)))
+            (hx, hy) = header.get_size()
+            (tx, ty) = temps.get_size()
+            (rx, ry) = rain.get_size()
             (ix, iy) = icon.get_size()
 
-        if iy < 88:
-            ye = (88 - iy) / 2
-        else:
-            ye = 0
+            if self._scale_icons:
+                icon = pygame.transform.scale(icon, (int(ix * 1.15), int(iy * 1.15)))
+                (ix, iy) = icon.get_size()
 
-        self._screen.blit(header, (self._xmax * vc - hx / 2, yo))
-        self._screen.blit(icon, (self._xmax * vc - ix / 2, hy + yo + gp + ye))
-        self._screen.blit(temps, (self._xmax * vc - tx / 2, self._ymax - (ry + ty + (gp * 2))))
-        self._screen.blit(rain, (self._xmax * vc - rx / 2, self._ymax - (ry + gp)))
+            if iy < 104:
+                ye = (104 - iy) / 2
+            else:
+                ye = 0
 
+            self._screen.blit(header, (self._xmax * vci - hx / 2, yo))
+            self._screen.blit(icon, (self._xmax * vci - ix / 2, hy + yo + ye + (gp * 2)))
+            self._screen.blit(temps, (self._xmax * vci - tx / 2, self._ymax - (ry + ty + (gp * 2))))
+            self._screen.blit(rain, (self._xmax * vci - rx / 2, self._ymax - (ry + gp)))
 
     def display_start(self):
         """display_start is the main initializer for the display it makes calls to many other
@@ -240,16 +237,25 @@ class DisplayDriver:
 
 
 # Test block.  ditch this when done building the display
+
+day_list = ['Today', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+wind_dir = ['N', 'E', 'W', 'S', 'NE', 'NW', 'SE', 'SW', 'NNE', 'ENE', 'NNW', 'WNW', 'SSE', 'ESE', 'SSW', 'WSW']
+
 new_display = DisplayDriver()
 new_display.display_start()
 
+for i in range(5):
+    low = randint(0, 90)
+    day = new_display._system_data.forecasts.forecasts[i]
+    day.update_day(day=day_list[i], low_temp=str(low), high_temp=str(randint(low, 90)), feels_like=str(randint(0, 90)),
+                   icon=randint(0, 47), wind_speed=str(randint(0, 30)), bara=str(randint(0, 30)),
+                   wind_dir=wind_dir[randint(0, 15)], rain=str(randint(0, 100)))
+
 i = 0
-w  = 0
+w = 0
 while True:
     pygame.time.wait(1000)
     new_display._system_data.ws.sig_strength = (i % 5)
-    new_display._system_data.forecasts.forecasts[0].update_day()
-    new_display._system_data.forecasts.forecasts[0].icon = (w % 48)
+    new_display._system_data.forecasts.forecasts[0].icon = (i % 47)
     i += 1
-    w += 1
     new_display.update_diplay()

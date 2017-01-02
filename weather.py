@@ -1,4 +1,5 @@
 
+
 class WeatherStation:
     def __init__(self, ):
         self.sig_strength = 2
@@ -6,6 +7,7 @@ class WeatherStation:
 
 class DayForecast:
     def __init__(self):
+        self.day = '-'
         self.low_temp = '-'
         self.high_temp = '-'
         self.feels_like = '-'
@@ -19,19 +21,33 @@ class DayForecast:
         self.rain = '-'
         self.icon = 29
 
-    def update_day(self):
-        self.low_temp = '20' + chr(0x00B0)
-        self.high_temp = '27' + chr(0x00B0)
-        self.feels_like = '14' + chr(0x00B0)
-        self.wind_speed = '4'
-        self.baro = '12'
-        self.wind_dir = 'NW'
-        self.humid = '2'
-        self.vis = '0'
-        self.gust = '5'
-        self.wind_direction = 'NW'
-        self.rain = '25'
-        self.icon = 5
+    def update_day(self, **kwargs):
+        if 'day' in kwargs:
+            self.day = kwargs['day']
+        if 'low_temp' in kwargs:
+            self.low_temp = kwargs['low_temp'] + chr(0x00B0)
+        if 'high_temp' in kwargs:
+            self.high_temp = kwargs['high_temp'] + chr(0x00B0)
+        if 'feels_like' in kwargs:
+            self.feels_like = kwargs['feels_like'] + chr(0x00B0)
+        if 'wind_speed' in kwargs:
+            self.wind_speed = kwargs['wind_speed']
+        if 'baro' in kwargs:
+            self.baro = kwargs['bara']
+        if 'wind_dir' in kwargs:
+            self.wind_dir = kwargs['wind_dir']
+        if 'humid' in kwargs:
+            self.humid = kwargs['humid']
+        if 'vis' in kwargs:
+            self.vis = kwargs['vis']
+        if 'gust' in kwargs:
+            self.gust = kwargs['gust']
+        if 'wind_direction' in kwargs:
+            self.wind_direction = kwargs['wind_direction']
+        if 'rain' in kwargs:
+            self.rain = kwargs['rain']
+        if 'icon' in kwargs:
+            self.icon = kwargs['icon']
 
 
 class WeatherForecasts:
