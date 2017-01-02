@@ -238,6 +238,31 @@ class DisplayDriver:
         self._screen.blit(icon, (vc - ix / 2, yc - iy / 2))
         self._screen.blit(mph, (vc - mx / 2, yc + (sy / 2) - (my / 2)))
 
+    def __display_indoor(self):
+        offset = self._ymax * .06
+        yb = self._ymax * 0.58
+        yt = self._ymax * 0.5
+        xc = (self._xmax * 0.33) / 2
+        xl = self._borders[0]
+        xr = self._xmax * 0.33
+        th = 0.048
+        smth = 0.03
+
+        font = pygame.font.SysFont(self._font, int(self._ymax * smth), bold=1)
+        lgfont = pygame.font.SysFont(self._font, int(self._ymax * th), bold=1)
+
+        name = font.render('Indoor', True, self._line_color)
+        temp = lgfont.render('{} f'.format('76' + chr(0x00B0)), True, self._line_color)
+        humid = lgfont.render('{}% RH'.format('34'), True, self._line_color)
+
+        (nx, ny) = name.get_size()
+        (tx, ty) = temp.get_size()
+        (hx, hy) = humid.get_size()
+
+        self._screen.blit(name, (xc - nx / 2, yt))
+        self._screen.blit(temp, (xl + offset, yb - ty))
+        self._screen.blit(humid, (xr - hx - offset, yb - hy))
+
     def display_start(self):
         """display_start is the main initializer for the display it makes calls to many other
         internal functions in order do build the dispay as defined in the initialization of the
@@ -251,6 +276,7 @@ class DisplayDriver:
             self.__display_connected()
             self.__display_forecasts()
             self.__weather_vane()
+            self.__display_indoor()
             pygame.display.update()
         except AssertionError as err:
             print(err)
@@ -264,6 +290,7 @@ class DisplayDriver:
             self.__display_connected()
             self.__display_forecasts()
             self.__weather_vane()
+            self.__display_indoor()
             pygame.display.update()
         except AssertionError as err:
             print("Update Error + {}".format(str(err)))
