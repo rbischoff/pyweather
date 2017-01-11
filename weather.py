@@ -1,9 +1,22 @@
 
 
 class WeatherStation:
-    def __init__(self, ):
+    def __init__(self):
         self.sig_strength = 2
         self._wind_directions = ['n', 's', 'e', 'w', 'ne', 'se', 'nw', 'sw']
+        self.temp = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
+        self.rain = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
+        self.baro = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
+        self.humidity = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
+        self.wind_speed = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
+        self.wind_direction_deg = {'current': '0',  'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
+        self.lumen = '0'
+        self.heat_index = '0'
+        self.wind_chill = '0'
+
+    def get_wind_direction(self):
+        pass
+
 
 class DayForecast:
     def __init__(self):

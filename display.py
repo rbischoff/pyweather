@@ -39,6 +39,8 @@ class DisplayDriver:
         self._scale_icons = True
         self._xmax = self._size[0] - self._borders[0]
         self._ymax = self._size[1] - self._borders[1]
+        self._av = 1
+        self._av_time = 1
         self._screen = None
 
     def __get_driver(self):
@@ -263,6 +265,153 @@ class DisplayDriver:
         self._screen.blit(temp, (xl + offset, yb - ty))
         self._screen.blit(humid, (xr - hx - offset, yb - hy))
 
+    def __display_left_frame(self):
+        # TODO: Clean up variables
+        data = self._system_data.ws
+
+        # offset = self._borders[0]
+        # text_border = self._ymax * .004
+        # centerline = self._xmax * .088
+
+        r_offset = self._xmax * .055
+
+        # yb = self._ymax * 0.5
+        # yt = self._ymax * 0.1
+        xc = (self._xmax * 0.33) / 2
+        yc = ((self._ymax * .5 - self._ymax * .1) / 2) + (self._ymax * .1)
+        # xl = self._borders[0]
+        xr = self._xmax * 0.33
+        # smth = 0.026
+        lth = 0.13
+        th = 0.055
+
+        font = pygame.font.SysFont(self._font, int(self._ymax * th), bold=1)
+        # smfont = pygame.font.SysFont(self._font, int(self._ymax * smth), bold=1)
+        lgfont = pygame.font.SysFont(self._font, int(self._ymax * lth), bold=1)
+
+        # TODO: Remove the random generator and fill with sensor data
+        temp = lgfont.render('{}'.format(randint(-60, 175)) + chr(0x00B0), True, self._line_color)
+        f = font.render('f', True, self._line_color)
+
+        (tx, ty) = temp.get_size()
+        (fx, fy) = f.get_size()
+
+        self._screen.blit(temp, (xc - tx / 2, yc - ty / 2))
+        self._screen.blit(f, (xr - fx - r_offset, xc - ty / 2 + fy / 2))
+
+    def __display_sensor_detail_data(self):
+
+        data = self._system_data.ws
+        c = 'current'
+        h = ['hour', 'day', 'week', 'month', 'year']
+        r = randint(0, 4)
+        rv = h[r]
+
+        offset = self._ymax * .022
+        bo = offset * 2
+        text_border = self._ymax * .004
+        centerline = self._xmax * .088
+        r_offset = self._xmax * .055
+
+        # Size and position variables
+        yb = self._ymax * 0.5
+        yt = self._ymax * 0.1
+        xc = (self._xmax * 0.33) / 2 + (self._xmax * 0.66)
+        xl = self._xmax * 0.66
+        xr = self._xmax
+        lc = xl + centerline * 2
+        rc = xr - r_offset
+        smth = 0.024
+        lth = 0.04
+        th = 0.031
+
+        # Todo: Make this part of self or store it in settings
+        hist_view = ['Peak', 'Average']
+        hist_view_time = ['Hour', 'Day', 'Week', 'Month', 'Year']
+        cf = ['c', 'f']
+
+        font = pygame.font.SysFont(self._font, int(self._ymax * th), bold=1)
+        smfont = pygame.font.SysFont(self._font, int(self._ymax * smth), bold=1)
+        lgfont = pygame.font.SysFont(self._font, int(self._ymax * lth), bold=1)
+
+        # Render labels
+        curr = lgfont.render('Current', True, self._line_color)
+        hist = lgfont.render(hist_view[randint(0, 1)], True, self._line_color)
+        hist_time = smfont.render(hist_view_time[r], True, self._line_color)
+        trend = smfont.render('Trend', True, self._line_color)
+        temp_label = font.render('Temp ({}):'.format(cf[randint(0, 1)]), True, self._line_color)
+        c_temp = font.render(data.temp[c] + chr(0x00B0), True, self._line_color)
+        h_temp = font.render(data.temp[rv] + chr(0x00B0), True, self._line_color)
+        humid_label = font.render('Humidity (RH):', True, self._line_color)
+        c_humid = font.render(data.humidity[c] + '%', True, self._line_color)
+        h_humid = font.render(data.humidity[rv], True, self._line_color)
+        baro_label = font.render('Barometer', True, self._line_color)
+        c_baro = font.render(data.baro[c], True, self._line_color)
+        h_baro = font.render(data.baro[rv], True, self._line_color)
+        wind_label = font.render('Wind Speed', True, self._line_color)
+        c_wind_speed = font.render(data.wind_speed[c], True, self._line_color)
+        h_wind_speed = font.render(data.wind_speed[rv], True, self._line_color)
+        wind_dir_label = font.render('Direction', True, self._line_color)
+        c_wind_direction = font.render(data.wind_direction_deg[c], True, self._line_color)
+        h_wind_direction = font.render(data.wind_direction_deg[rv], True, self._line_color)
+        li_label = font.render('Light IDX', True, self._line_color)
+        c_lumen = font.render(data.lumen, True, self._line_color)
+        h_lumen = font.render('N/A', True, self._line_color)
+
+        # Draw header
+        (cx, cy) = curr.get_size()
+        (hx, hy) = hist.get_size()
+        self._screen.blit(curr, (lc - cx / 2, yt + offset))
+        self._screen.blit(hist, (rc - hx / 2, yt + offset))
+
+        # Draw sub-header
+        (htx, hty) = hist_time.get_size()
+        (tx, ty) = trend.get_size()
+        self._screen.blit(hist_time, (rc - htx / 2, yt + cy + offset))
+        self._screen.blit(trend, (((rc - xc) / 2) + xc - tx / 2, yt + cy + offset))
+
+        # Draw temp
+        (ctx, cty) = c_temp.get_size()
+        (htx, hty) = h_temp.get_size()
+        self._screen.blit(temp_label, (xl + offset, yt + bo + cy + ty + text_border))
+        self._screen.blit(c_temp, (lc - ctx / 2, yt + bo + cy + ty + text_border))
+        self._screen.blit(h_temp, (rc - htx / 2, yt + bo + cy + ty + text_border))
+
+        # Draw humidity
+        (chx, chy) = c_humid.get_size()
+        (hhx, hhy) = h_humid.get_size()
+        self._screen.blit(humid_label, (xl + offset, yt + bo + cy + ty + cty + text_border))
+        self._screen.blit(c_humid, (lc - chx / 2, yt + bo + cy + ty + cty + text_border))
+        self._screen.blit(h_humid, (rc - hhx / 2, yt + bo + cy + ty + hty + text_border))
+
+        # Draw Barometric Pressure
+        (cbx, cby) = c_baro.get_size()
+        (hbx, hby) = h_baro.get_size()
+        self._screen.blit(baro_label, (xl + offset, yt + bo + cy + ty + cty + chy + text_border))
+        self._screen.blit(c_baro, (lc - cbx / 2, yt + bo + cy + ty + cty + chy + text_border))
+        self._screen.blit(h_baro, (rc - hbx / 2, yt + bo + cy + ty + hty + hhy + text_border))
+
+        # Draw wind speed
+        (cwsx, cwsy) = c_wind_speed.get_size()
+        (hwsx, hwsy) = h_wind_speed.get_size()
+        self._screen.blit(wind_label, (xl + offset, yt + bo + cy + ty + cty + chy + cby + text_border))
+        self._screen.blit(c_wind_speed, (lc - cwsx / 2, yt + bo + cy + ty + cty + chy + cby + text_border))
+        self._screen.blit(h_wind_speed, (rc - hwsx / 2, yt + bo + cy + ty + hty + hhy + hby + text_border))
+
+        # Draw wind direction
+        (cwdx, cwdy) = c_wind_direction.get_size()
+        (hwdx, hwdy) = h_wind_direction.get_size()
+        self._screen.blit(wind_dir_label, (xl + offset, yt + bo + cy + ty + cty + chy + cby + cwsy + text_border))
+        self._screen.blit(c_wind_direction, (lc - cwdx / 2, yt + bo + cy + ty + cty + chy + cby + cwsy + text_border))
+        self._screen.blit(h_wind_direction, (rc - hwdx / 2, yt + bo + cy + ty + hty + hhy + hby + hwsy + text_border))
+
+        # Draw light index
+        (clx, cly) = c_lumen.get_size()
+        (hlx, hly) = h_lumen.get_size()
+        self._screen.blit(li_label, (xl + offset, yt + bo + cy + ty + cty + chy + cby + cwsy + cwdy + text_border))
+        self._screen.blit(c_lumen, (lc - clx / 2, yt + bo + cy + ty + cty + chy + cby + cwsy + cwdy + text_border))
+        self._screen.blit(h_lumen, (rc - hlx / 2, yt + bo + cy + ty + hty + hhy + hby + hwsy + hwdy + text_border))
+
     def display_start(self):
         """display_start is the main initializer for the display it makes calls to many other
         internal functions in order do build the dispay as defined in the initialization of the
@@ -277,6 +426,8 @@ class DisplayDriver:
             self.__display_forecasts()
             self.__weather_vane()
             self.__display_indoor()
+            self.__display_left_frame()
+            self.__display_sensor_detail_data()
             pygame.display.update()
         except AssertionError as err:
             print(err)
@@ -291,6 +442,8 @@ class DisplayDriver:
             self.__display_forecasts()
             self.__weather_vane()
             self.__display_indoor()
+            self.__display_left_frame()
+            self.__display_sensor_detail_data()
             pygame.display.update()
         except AssertionError as err:
             print("Update Error + {}".format(str(err)))
