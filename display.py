@@ -247,7 +247,7 @@ class DisplayDriver:
         xc = (self._xmax * 0.33) / 2
         xl = self._borders[0]
         xr = self._xmax * 0.33
-        th = 0.048
+        th = 0.045
         smth = 0.03
 
         font = pygame.font.SysFont(self._font, int(self._ymax * smth), bold=1)
@@ -264,6 +264,36 @@ class DisplayDriver:
         self._screen.blit(name, (xc - nx / 2, yt))
         self._screen.blit(temp, (xl + offset, yb - ty))
         self._screen.blit(humid, (xr - hx - offset, yb - hy))
+
+    def __display_feels_like(self):
+        offset = self._ymax * .06
+        centering = self._xmax * .085
+        yb = self._ymax * 0.58
+        yt = self._ymax * 0.5
+        xl = self._xmax * 0.66
+        xr = self._xmax
+        lc = xl + centering
+        rc = xr - centering
+        th = 0.045
+        smth = 0.03
+
+        font = pygame.font.SysFont(self._font, int(self._ymax * smth), bold=1)
+        lgfont = pygame.font.SysFont(self._font, int(self._ymax * th), bold=1)
+
+        heat_idx_label = font.render('Heat Index', True, self._line_color)
+        heat_idx = lgfont.render('{} f'.format('76' + chr(0x00B0)), True, self._line_color)
+        wind_chill_label = font.render('Wind Chill', True, self._line_color)
+        wind_chill = lgfont.render('{} f'.format('34' + chr(0x00B0)), True, self._line_color)
+
+        (hlx, hly) = heat_idx_label.get_size()
+        (hix, hiy) = heat_idx.get_size()
+        (wclx, wcly) = wind_chill_label.get_size()
+        (wcx, wcy) = wind_chill.get_size()
+
+        self._screen.blit(heat_idx_label, (lc - hlx / 2, yt))
+        self._screen.blit(heat_idx, (lc - hix / 2, yb - hiy))
+        self._screen.blit(wind_chill_label, (rc - wclx / 2, yt))
+        self._screen.blit(wind_chill, (rc - wcx / 2, yb - wcy))
 
     def __display_left_frame(self):
         # TODO: Clean up variables
@@ -428,6 +458,7 @@ class DisplayDriver:
             self.__display_indoor()
             self.__display_left_frame()
             self.__display_sensor_detail_data()
+            self.__display_feels_like()
             pygame.display.update()
         except AssertionError as err:
             print(err)
@@ -444,6 +475,7 @@ class DisplayDriver:
             self.__display_indoor()
             self.__display_left_frame()
             self.__display_sensor_detail_data()
+            self.__display_feels_like()
             pygame.display.update()
         except AssertionError as err:
             print("Update Error + {}".format(str(err)))
