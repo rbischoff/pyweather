@@ -266,7 +266,6 @@ class DisplayDriver:
         self._screen.blit(humid, (xr - hx - offset, yb - hy))
 
     def __display_feels_like(self):
-        offset = self._ymax * .06
         centering = self._xmax * .085
         yb = self._ymax * 0.58
         yt = self._ymax * 0.5
@@ -299,35 +298,47 @@ class DisplayDriver:
         # TODO: Clean up variables
         data = self._system_data.ws
 
-        # offset = self._borders[0]
-        # text_border = self._ymax * .004
-        # centerline = self._xmax * .088
-
-        r_offset = self._xmax * .055
+        centering = self._xmax * .085
 
         # yb = self._ymax * 0.5
-        # yt = self._ymax * 0.1
+        yt = self._ymax * 0.1
+        offset = self._ymax * .04
+        text_border = self._ymax * .004
         xc = (self._xmax * 0.33) / 2
         yc = ((self._ymax * .5 - self._ymax * .1) / 2) + (self._ymax * .1)
-        # xl = self._borders[0]
+        xl = self._borders[0]
         xr = self._xmax * 0.33
-        # smth = 0.026
-        lth = 0.13
+        lc = xl + centering
+        rc = xr - centering
+        smth = 0.034
+        lth = 0.085
         th = 0.055
 
         font = pygame.font.SysFont(self._font, int(self._ymax * th), bold=1)
-        # smfont = pygame.font.SysFont(self._font, int(self._ymax * smth), bold=1)
+        smfont = pygame.font.SysFont(self._font, int(self._ymax * smth), bold=1)
         lgfont = pygame.font.SysFont(self._font, int(self._ymax * lth), bold=1)
 
         # TODO: Remove the random generator and fill with sensor data
+        temp_label = smfont.render('Temp({})'.format('f'), True, self._line_color)
         temp = lgfont.render('{}'.format(randint(-60, 175)) + chr(0x00B0), True, self._line_color)
-        f = font.render('f', True, self._line_color)
+        var = lgfont.render('{}'.format(randint(0, 100)), True, self._line_color)
+        var_label = smfont.render('Humidity(RH)', True, self._line_color)
+        up = pygame.image.load_extended(self._base_dir + 'navigation/up_arrow.png')
+        down = pygame.image.load_extended(self._base_dir + 'navigation/down_arrow.png')
 
         (tx, ty) = temp.get_size()
-        (fx, fy) = f.get_size()
+        (tlx, tly) = temp_label.get_size()
+        (vx, vy) = var.get_size()
+        (vlx, vly) = var_label.get_size()
+        (ux, uy) = up.get_size()
+        (dx, dy) = down.get_size()
 
-        self._screen.blit(temp, (xc - tx / 2, yc - ty / 2))
-        self._screen.blit(f, (xr - fx - r_offset, xc - ty / 2 + fy / 2))
+        self._screen.blit(temp_label, (lc - tlx / 2, yc - (ty / 2) - (tly / 2) - text_border))
+        self._screen.blit(temp, (lc - tx / 2, yc - ty / 2))
+        self._screen.blit(var_label, (rc - vlx / 2, yc - (vy / 2) - (vly / 2) - text_border))
+        self._screen.blit(var, (rc - vx / 2, yc - vy / 2))
+        self._screen.blit(up, (rc - ux / 2, yc - (vy / 2) - (vly / 2) - uy - text_border))
+        self._screen.blit(down, (rc - dx / 2, yc + (vy / 2) + (uy / 2) + text_border))
 
     def __display_sensor_detail_data(self):
 
