@@ -7,7 +7,7 @@ from settings import ICON_BASE_DIR, ICON_DICTIONARY, ICON_TYPES, COMPASS_DIR
 
 DEFAULT_DRIVERS = ('fbcon', 'directfb', 'svgalib', 'Quartz')
 DEFAULT_SIZE = (1024, 600)
-DEFAULT_SCREEN = 'resizable'
+DEFAULT_SCREEN = 'full_screen'
 
 
 class DisplayDriver:
@@ -507,11 +507,22 @@ for i in range(5):
                    icon=randint(0, 47), wind_speed=str(randint(0, 30)), bara=str(randint(0, 30)),
                    wind_dir=wind_dir[randint(0, 15)], rain=str(randint(0, 100)))
 
+
 i = 0
 w = 0
-while True:
-    pygame.time.wait(1000)
+running = True
+while running:
+    event = pygame.event.get()
     new_display._system_data.ws.sig_strength = (i % 5)
     new_display._system_data.forecasts.forecasts[0].icon = (i % 47)
     i += 1
     new_display.update_diplay()
+    pygame.time.wait(1000)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
+pygame.quit()
+quit()
