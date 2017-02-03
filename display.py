@@ -7,7 +7,7 @@ from settings import ICON_BASE_DIR, ICON_DICTIONARY, ICON_TYPES, COMPASS_DIR
 
 DEFAULT_DRIVERS = ('fbcon', 'directfb', 'svgalib', 'Quartz')
 DEFAULT_SIZE = (1024, 600)
-DEFAULT_SCREEN = 'full_screen'
+DEFAULT_SCREEN = 'resizable'
 
 
 class DisplayDriver:
@@ -42,6 +42,12 @@ class DisplayDriver:
         self._av = 1
         self._av_time = 1
         self._screen = None
+        self._blits = []
+
+    def __append_blits(self, blits):
+
+        for blit in blits:
+            self._blits.append(blit)
 
     def __get_driver(self):
         has_driver = False
@@ -60,6 +66,11 @@ class DisplayDriver:
         if not has_driver:
             raise AssertionError('No video driver available for use!')
 
+    def __render_screen(self):
+        for _ in range(len(self._blits)):
+            blit = self._blits.pop() # pop off each item once drawn to allow for updates to display
+            self._screen.blit(blit[0], blit[1])
+
     def __draw_screen(self):
         """This function is intended to be used by the display_start function.
         It attempts to build the blank screen and raises an error if it fails."""
@@ -71,6 +82,7 @@ class DisplayDriver:
 
         self._screen.fill((0, 0, 0))
         pygame.font.init()
+        # TODO: Uncomment the mouse hider
         # pygame.mouse.set_visible(0)
         pygame.display.update()
 
@@ -192,17 +204,18 @@ class DisplayDriver:
             temps = font.render(today.low_temp + ' / ' + today.high_temp, True, self._line_color)
             rain = lgfont.render(today.rain + '%', True, self._line_color)
             icon = pygame.image.load_extended(self._base_dir +
-                                              self._system_data.weather_icons[today.icon]).convert_alpha()
+                                              self._system_data.weather_icons[today.icon])
 
             (hx, hy) = header.get_size()
             (tx, ty) = temps.get_size()
             (rx, ry) = rain.get_size()
             (ix, iy) = icon.get_size()
 
+            """
             if self._scale_icons:
                 icon = pygame.transform.scale(icon, (int(ix * 1.15), int(iy * 1.15)))
                 (ix, iy) = icon.get_size()
-
+            """
             if iy < 104:
                 ye = (104 - iy) / 2
             else:
@@ -303,7 +316,7 @@ class DisplayDriver:
         # yb = self._ymax * 0.5
         yt = self._ymax * 0.1
         offset = self._ymax * .04
-        text_border = self._ymax * .004
+        text_border = self._ymax * .008
         xc = (self._xmax * 0.33) / 2
         yc = ((self._ymax * .5 - self._ymax * .1) / 2) + (self._ymax * .1)
         xl = self._borders[0]
@@ -333,12 +346,52 @@ class DisplayDriver:
         (ux, uy) = up.get_size()
         (dx, dy) = down.get_size()
 
-        self._screen.blit(temp_label, (lc - tlx / 2, yc - (ty / 2) - (tly / 2) - text_border))
-        self._screen.blit(temp, (lc - tx / 2, yc - ty / 2))
-        self._screen.blit(var_label, (rc - vlx / 2, yc - (vy / 2) - (vly / 2) - text_border))
-        self._screen.blit(var, (rc - vx / 2, yc - vy / 2))
-        self._screen.blit(up, (rc - ux / 2, yc - (vy / 2) - (vly / 2) - uy - text_border))
-        self._screen.blit(down, (rc - dx / 2, yc + (vy / 2) + (uy / 2) + text_border))
+        # add render items to the blit list
+        blits = [(temp_label, (lc - tlx / 2, yc - (ty / 2) - (tly / 2) - text_border)),
+                 (temp, (lc - tx / 2, yc - ty / 2)),
+                 (var_label, (rc - vlx / 2, yc - (vy / 2) - (vly / 2) - text_border)),
+                 (var, (rc - vx / 2, yc - vy / 2)),
+                 (up, (rc - ux / 2, yc - (vy / 2) - vly - uy + text_border)),
+                 (down, (rc - dx / 2, yc + (vy / 2) + text_border))
+                 ]
+
+        self.__append_blits(blits)
+
+    def __display_wind_avg(self):
+        centering = self._xmax * .085
+        offset = self._ymax * .006
+        yb = self._ymax * 0.58
+        yt = self._ymax * 0.5
+        xl = self._xmax * 0.33
+        xr = self._xmax * 0.66
+        lc = xl + centering
+        rc = xr - centering
+        lth = 0.045
+        th = 0.03
+        smth = .025
+
+        smfont = pygame.font.SysFont(self._font, int(self._ymax * smth), bold=1)
+        font = pygame.font.SysFont(self._font, int(self._ymax * th), bold=1)
+        lgfont = pygame.font.SysFont(self._font, int(self._ymax * lth), bold=1)
+
+        wind_peak_label = font.render('Peak Wind', True, self._line_color)
+        peak_wind = lgfont.render('{}'.format('76'), True, self._line_color)
+        wind_avg_label = font.render('Avg. Wind', True, self._line_color)
+        wind_avg = lgfont.render('{}'.format('34'), True, self._line_color)
+        mph = smfont.render('mph', True, self._line_color)
+
+        (wplx, wply) = wind_peak_label.get_size()
+        (wpx, wpy) = peak_wind.get_size()
+        (walx, waly) = wind_avg_label.get_size()
+        (wax, way) = wind_avg.get_size()
+        (mx, my) = mph.get_size()
+
+        self._screen.blit(wind_peak_label, (lc - wplx / 2, yt))
+        self._screen.blit(peak_wind, (lc - wpx / 2, yb - wpy))
+        self._screen.blit(wind_avg_label, (rc - walx / 2, yt))
+        self._screen.blit(wind_avg, (rc - wax / 2, yb - way))
+        self._screen.blit(mph, (lc + wpx - (mx / 2) + offset, yb - wpy))
+        self._screen.blit(mph, (rc + wax - (mx / 2) + offset, yb - way))
 
     def __display_sensor_detail_data(self):
 
@@ -385,17 +438,17 @@ class DisplayDriver:
         h_temp = font.render(data.temp[rv] + chr(0x00B0), True, self._line_color)
         humid_label = font.render('Humidity (RH):', True, self._line_color)
         c_humid = font.render(data.humidity[c] + '%', True, self._line_color)
-        h_humid = font.render(data.humidity[rv], True, self._line_color)
-        baro_label = font.render('Barometer', True, self._line_color)
+        h_humid = font.render(data.humidity[rv] + '%', True, self._line_color)
+        baro_label = font.render('Pressure (inHg)', True, self._line_color)
         c_baro = font.render(data.baro[c], True, self._line_color)
         h_baro = font.render(data.baro[rv], True, self._line_color)
-        wind_label = font.render('Wind Speed', True, self._line_color)
+        wind_label = font.render('Speed (mph)', True, self._line_color)
         c_wind_speed = font.render(data.wind_speed[c], True, self._line_color)
         h_wind_speed = font.render(data.wind_speed[rv], True, self._line_color)
         wind_dir_label = font.render('Direction', True, self._line_color)
-        c_wind_direction = font.render(data.wind_direction_deg[c], True, self._line_color)
-        h_wind_direction = font.render(data.wind_direction_deg[rv], True, self._line_color)
-        li_label = font.render('Light IDX', True, self._line_color)
+        c_wind_direction = font.render(data.wind_direction_deg[c] + chr(0x00B0), True, self._line_color)
+        h_wind_direction = font.render(data.wind_direction_deg[rv] + chr(0x00B0), True, self._line_color)
+        li_label = font.render('Lumens', True, self._line_color)
         c_lumen = font.render(data.lumen, True, self._line_color)
         h_lumen = font.render('N/A', True, self._line_color)
 
@@ -409,7 +462,7 @@ class DisplayDriver:
         (htx, hty) = hist_time.get_size()
         (tx, ty) = trend.get_size()
         self._screen.blit(hist_time, (rc - htx / 2, yt + cy + offset))
-        self._screen.blit(trend, (((rc - xc) / 2) + xc - tx / 2, yt + cy + offset))
+        # self._screen.blit(trend, (((rc - xc) / 2) + xc - tx / 2, yt + cy + offset))
 
         # Draw temp
         (ctx, cty) = c_temp.get_size()
@@ -461,16 +514,7 @@ class DisplayDriver:
         try:
             self.__get_driver()
             self.__draw_screen()
-            self.__draw_frames()
-            self.__display_datetime()
-            self.__display_connected()
-            self.__display_forecasts()
-            self.__weather_vane()
-            self.__display_indoor()
-            self.__display_left_frame()
-            self.__display_sensor_detail_data()
-            self.__display_feels_like()
-            pygame.display.update()
+
         except AssertionError as err:
             print(err)
             quit()
@@ -487,6 +531,8 @@ class DisplayDriver:
             self.__display_left_frame()
             self.__display_sensor_detail_data()
             self.__display_feels_like()
+            self.__render_screen()
+            self.__display_wind_avg()
             pygame.display.update()
         except AssertionError as err:
             print("Update Error + {}".format(str(err)))
@@ -514,7 +560,7 @@ running = True
 while running:
     event = pygame.event.get()
     new_display._system_data.ws.sig_strength = (i % 5)
-    new_display._system_data.forecasts.forecasts[0].icon = (i % 47)
+    new_display._system_data.forecasts.forecasts[0].icon = 0 # (i % 47)
     i += 1
     new_display.update_diplay()
     pygame.time.wait(1000)
