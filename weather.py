@@ -1,3 +1,5 @@
+import json
+import requests
 
 
 class WeatherStation:
@@ -64,5 +66,18 @@ class DayForecast:
 
 
 class WeatherForecasts:
-    def __init__(self, days=5):
+    def __init__(self, days=5, state='MD', city='Fort_Meade'):
+        self._days = days
+        self._state = state
+        self._city = city
         self.forecasts = [DayForecast() for _ in range(days)]
+
+    def get_forecasts(self):
+
+        r = requests.post(
+            'http://api.wunderground.com/api/add326d1e4c43c31/'
+            'forecast10day/conditions/q/{}/{}.json'.format(self._state, self._city))
+        json_string = r.content.decode()
+        parsed_json = json.loads(json_string)
+        temp_f = parsed_json['current_observation']['temp_f']
+        print("Current temperature is: %s" % (temp_f))

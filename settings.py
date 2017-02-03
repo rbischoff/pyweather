@@ -15,10 +15,10 @@ ICON_DICTIONARY = {'weather_station': 'weather_station/weather_station.png',
                    }
 
 icons = [
-    sd + 'thunderstorms.png',        # 0 - Thunderstorms
+    sd + 'thunderstorm.png',         # 0 - Thunderstorms
     sd + 'windy.png',                # 1 - Windy Rain
     sd + 'unknown.png',              # 2 - Windy Rain
-    sd + 'thunderstorms.png',        # 3 - Thunderstorms
+    sd + 'thunderstorm.png',         # 3 - Thunderstorms
     sd + 't-storms2.png',            # 4 - T-Storms
     sd + 'rain_snow.png',            # 5 - Rain Snow
     sd + 'rain_snow.png',            # 6 - Rain Sleet
@@ -32,7 +32,7 @@ icons = [
     sd + 'snow.png',                 # 14 - Light Snow
     sd + 'snow.png',                 # 15 - Snowflakes
     sd + 'snow.png',                 # 16 - Heavy Snow
-    sd + 'thunderstorms.png',        # 17 - Thunderstorms
+    sd + 'thunderstorm.png',         # 17 - Thunderstorms
     sd + 'unknown.png',              # 18 - Hail
     sd + 'unknown.png',              # 19 - Dust
     sd + 'fog.png',                  # 20 - Fog
@@ -50,11 +50,11 @@ icons = [
     sd + 'sunny.png',                # 32 - Sunny
     sd + 'sunny.png',                # 33 - Fair
     sd + 'sunny.png',                # 34 - Fair
-    sd + 'thunderstorms.png',        # 35 - Thunderstorms
+    sd + 'thunderstorm.png',         # 35 - Thunderstorms
     sd + 'sunny.png',                # 36 - Hot
     sd + 'scattered_tstorms.png',    # 37 - Isolated Thunder
     sd + 'scattered_tstorms.png',    # 38 - Scattered T-Storms
-    sd + 'rain.png',                 # 39 - Scattered Rain
+    sd + 'calm_rain1.png',           # 39 - Scattered Rain
     sd + 'rain.png',                 # 40 - Heavy Rain
     sd + 'snow.png',                 # 41 - Scattered Snow
     sd + 'snow.png',                 # 42 - Heavy Snow
@@ -64,3 +64,33 @@ icons = [
     sd + 'snow.png',                 # 46 - Snowy Night
     sd + 'scattered_tstorms.png'     # 47 - Scattered T-Storms Night (the "Night" will not be included)
 ]
+
+wu_forecasts = {
+    'Chance of Flurries': sd + 'chanceflurries.png',
+    'Chance of Rain': sd + 'chancerain.png',
+    'Chance Rain': sd + 'chancerain.png',
+    'Chance of Freezing Rain': sd + 'chancesleet.png',
+    'Chance of Sleet': sd + 'chancesleet.png',
+    'Chance of Snow': sd + 'chancesnow.png',
+    'Chance of Thunderstorms': sd + 'chancetstorms.png',
+    'Chance of a Thunderstorm':	sd + 'chancetstorms.png',
+    'Clear': sd + 'clear.plg',
+    'Cloudy': sd + 'cloudy.png',
+    'Flurries': sd + 'flurries.png',
+    'Fog': sd + 'fog.png',
+    'Haze': sd + 'hazy.png',
+    'Mostly Cloudy': sd + 'mostlycloudy.png',
+    'Mostly Sunny': sd + 'mostlysunny.png',
+    'Partly Cloudy': sd + 'partlycloudy.png',
+    'Partly Sunny': sd + 'partlysunny.png',
+    'Freezing Rain': sd + 'sleet.png',
+    'Rain': sd + 'rain.png',
+    'Sleet': sd + 'sleet.png',
+    'Snow': sd + 'snow.png',
+    'Sunny': sd + 'sunny.png',
+    'Thunderstorms': sd + 'thunderstorm.png',
+    'Thunderstorm': sd + 'thunderstorm.png',
+    'Unknown': sd + 'unknown.png',
+    'Overcast':	 sd + 'cloudy.png',
+    'Scattered Clouds': sd + 'partlycloudy.png'
+}
