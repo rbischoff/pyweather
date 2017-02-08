@@ -26,6 +26,7 @@ class DisplayDriver:
                    'hw_surface': pygame.HWSURFACE, 'open_GL': pygame.OPENGL, 'resizable': pygame.RESIZABLE}
 
         self._system_data = SystemData()
+        self._display_instance = None
         self._drivers = drivers
         self._size = size
         self._borders = borders
@@ -129,7 +130,7 @@ class DisplayDriver:
         th = 0.07     # Time Text Height
         sh = 0.03     # Seconds Text Height
         dh = 0.06     # Date Text Height
-        dt_y = 13  # Date Y Position
+        dt_y = 13     # Date Y Position
         tm_y = 10     # Time Y Position
         tm_y_sm = 15  # Time Y Position Small
 
@@ -203,8 +204,14 @@ class DisplayDriver:
             header = font.render(today.day, True, self._line_color)
             temps = font.render(today.low_temp + ' / ' + today.high_temp, True, self._line_color)
             rain = lgfont.render(today.rain + '%', True, self._line_color)
-            icon = pygame.image.load_extended(self._base_dir +
-                                              self._system_data.weather_icons[today.icon])
+
+            icon_path = self._base_dir + 'forecast/unknown.png'
+            if today.icon in self._system_data.weather_icons:
+                icon_path = self._base_dir + self._system_data.weather_icons[today.icon]
+            else:
+                print(today.icon + ' unknown')
+
+            icon = pygame.image.load_extended(icon_path)
 
             (hx, hy) = header.get_size()
             (tx, ty) = temps.get_size()
@@ -233,17 +240,15 @@ class DisplayDriver:
         th = 0.1
         smth = 0.04
 
-        # TODO: Remove this tester when complete
-        wind_directions = ['n', 's', 'e', 'w', 'ne', 'se', 'nw', 'sw']
-
         lgfont = pygame.font.SysFont(self._font, int(self._ymax * th), bold=1)
         font = pygame.font.SysFont(self._font, int(self._ymax * smth), bold=1)
 
         mph = font.render('mph', True, self._line_color)
-        speed = lgfont.render(str(randint(0, 100)), True, self._line_color)
+        speed = lgfont.render(self._system_data.ws.wind_speed['current'], True, self._line_color)
+        wd = self._system_data.wind_dirs[self._system_data.ws.wind_direction]
 
         icon = pygame.image.load_extended(self._base_dir +
-                                          'compass/{}_calm.png'.format(wind_directions[randint(0, 7)])).convert_alpha()
+                                          'compass/{}_calm.png'.format(wd)).convert_alpha()
 
         (ix, iy) = icon.get_size()
         (sx, sy) = speed.get_size()
@@ -279,6 +284,7 @@ class DisplayDriver:
         self._screen.blit(humid, (xr - hx - offset, yb - hy))
 
     def __display_feels_like(self):
+        data = self._system_data.ws
         centering = self._xmax * .085
         yb = self._ymax * 0.58
         yt = self._ymax * 0.5
@@ -292,10 +298,16 @@ class DisplayDriver:
         font = pygame.font.SysFont(self._font, int(self._ymax * smth), bold=1)
         lgfont = pygame.font.SysFont(self._font, int(self._ymax * th), bold=1)
 
+        def add_symbol(val):
+            if val != 'NA':
+                val += chr(0x00B0) + " f"
+                return val
+            return val
+
         heat_idx_label = font.render('Heat Index', True, self._line_color)
-        heat_idx = lgfont.render('{} f'.format('76' + chr(0x00B0)), True, self._line_color)
+        heat_idx = lgfont.render('{}'.format(add_symbol(data.heat_index)), True, self._line_color)
         wind_chill_label = font.render('Wind Chill', True, self._line_color)
-        wind_chill = lgfont.render('{} f'.format('34' + chr(0x00B0)), True, self._line_color)
+        wind_chill = lgfont.render('{}'.format(add_symbol(data.wind_chill)), True, self._line_color)
 
         (hlx, hly) = heat_idx_label.get_size()
         (hix, hiy) = heat_idx.get_size()
@@ -333,8 +345,8 @@ class DisplayDriver:
 
         # TODO: Remove the random generator and fill with sensor data
         temp_label = smfont.render('Temp({})'.format('f'), True, self._line_color)
-        temp = lgfont.render('{}'.format(randint(-60, 175)) + chr(0x00B0), True, self._line_color)
-        var = lgfont.render('{}'.format(randint(0, 100)), True, self._line_color)
+        temp = lgfont.render(data.temp['current'], True, self._line_color)
+        var = lgfont.render(data.humidity['current'], True, self._line_color)
         var_label = smfont.render('Humidity(RH)', True, self._line_color)
         up = pygame.image.load_extended(self._base_dir + 'navigation/up_arrow.png')
         down = pygame.image.load_extended(self._base_dir + 'navigation/down_arrow.png')
@@ -359,7 +371,7 @@ class DisplayDriver:
 
     def __display_wind_avg(self):
         centering = self._xmax * .085
-        offset = self._ymax * .006
+        offset = self._ymax * .008
         yb = self._ymax * 0.58
         yt = self._ymax * 0.5
         xl = self._xmax * 0.33
@@ -374,10 +386,10 @@ class DisplayDriver:
         font = pygame.font.SysFont(self._font, int(self._ymax * th), bold=1)
         lgfont = pygame.font.SysFont(self._font, int(self._ymax * lth), bold=1)
 
-        wind_peak_label = font.render('Peak Wind', True, self._line_color)
-        peak_wind = lgfont.render('{}'.format('76'), True, self._line_color)
+        wind_peak_label = font.render('Wind Gust', True, self._line_color)
+        peak_wind = lgfont.render(self._system_data.ws.wind_gust, True, self._line_color)
         wind_avg_label = font.render('Avg. Wind', True, self._line_color)
-        wind_avg = lgfont.render('{}'.format('34'), True, self._line_color)
+        wind_avg = lgfont.render(self._system_data.ws.wind_avg, True, self._line_color)
         mph = smfont.render('mph', True, self._line_color)
 
         (wplx, wply) = wind_peak_label.get_size()
@@ -398,8 +410,7 @@ class DisplayDriver:
         data = self._system_data.ws
         c = 'current'
         h = ['hour', 'day', 'week', 'month', 'year']
-        r = randint(0, 4)
-        rv = h[r]
+        rv = h[0]
 
         offset = self._ymax * .022
         bo = offset * 2
@@ -416,7 +427,7 @@ class DisplayDriver:
         lc = xl + centerline * 2
         rc = xr - r_offset
         smth = 0.024
-        lth = 0.04
+        lth = 0.035
         th = 0.031
 
         # Todo: Make this part of self or store it in settings
@@ -430,14 +441,14 @@ class DisplayDriver:
 
         # Render labels
         curr = lgfont.render('Current', True, self._line_color)
-        hist = lgfont.render(hist_view[randint(0, 1)], True, self._line_color)
-        hist_time = smfont.render(hist_view_time[r], True, self._line_color)
+        hist = lgfont.render(hist_view[1], True, self._line_color)
+        hist_time = smfont.render(hist_view_time[0], True, self._line_color)
         trend = smfont.render('Trend', True, self._line_color)
-        temp_label = font.render('Temp ({}):'.format(cf[randint(0, 1)]), True, self._line_color)
+        temp_label = font.render('Temp ({}):'.format(cf[1]), True, self._line_color)
         c_temp = font.render(data.temp[c] + chr(0x00B0), True, self._line_color)
         h_temp = font.render(data.temp[rv] + chr(0x00B0), True, self._line_color)
         humid_label = font.render('Humidity (RH):', True, self._line_color)
-        c_humid = font.render(data.humidity[c] + '%', True, self._line_color)
+        c_humid = font.render(data.humidity[c], True, self._line_color)
         h_humid = font.render(data.humidity[rv] + '%', True, self._line_color)
         baro_label = font.render('Pressure (inHg)', True, self._line_color)
         c_baro = font.render(data.baro[c], True, self._line_color)
@@ -537,38 +548,54 @@ class DisplayDriver:
         except AssertionError as err:
             print("Update Error + {}".format(str(err)))
 
+    def update_daily_data(self):
+        self._system_data.forecasts.update_forecast_data()
+        self._system_data.forecasts.update_forecasts()
+
+    def update_current_data(self):
+        self._system_data.ws.update_station()
+
+    def run(self):
+        cnt = 0
+        self.display_start()
+
+        running = True
+        while running:
+
+            pygame.time.wait(1000)
+            self.update_diplay()
+            cnt += 1
+            if cnt >= 209:
+                cnt = 0
+                self.update_current_data()
+            if time.strftime("%d/%m") != self._system_data.current_date:
+                self._system_data.current_date = time.strftime("%d/%s")
+                self.update_daily_data()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+
 
 # Test block.  ditch this when done building the display
 
 day_list = ['Today', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 wind_dir = ['N', 'E', 'W', 'S', 'NE', 'NW', 'SE', 'SW', 'NNE', 'ENE', 'NNW', 'WNW', 'SSE', 'ESE', 'SSW', 'WSW']
 
-new_display = DisplayDriver()
-new_display.display_start()
 
-for i in range(5):
-    low = randint(0, 90)
-    day = new_display._system_data.forecasts.forecasts[i]
-    day.update_day(day=day_list[i], low_temp=str(low), high_temp=str(randint(low, 90)), feels_like=str(randint(0, 90)),
-                   icon=randint(0, 47), wind_speed=str(randint(0, 30)), bara=str(randint(0, 30)),
-                   wind_dir=wind_dir[randint(0, 15)], rain=str(randint(0, 100)))
+#for i in range(5):
+#    low = randint(0, 90)
+#    day = new_display._system_data.forecasts.forecasts[i]
+#    day.update_day(day=day_list[i], low_temp=str(low), high_temp=str(randint(low, 90)), feels_like=str(randint(0, 90)),
+#                   icon=randint(0, 47), wind_speed=str(randint(0, 30)), bara=str(randint(0, 30)),
+#                   wind_dir=wind_dir[randint(0, 15)], rain=str(randint(0, 100)))
 
+disp = DisplayDriver()
+disp.update_daily_data()
+disp.update_current_data()
+disp.run()
 
-i = 0
-w = 0
-running = True
-while running:
-    event = pygame.event.get()
-    new_display._system_data.ws.sig_strength = (i % 5)
-    new_display._system_data.forecasts.forecasts[0].icon = 0 # (i % 47)
-    i += 1
-    new_display.update_diplay()
-    pygame.time.wait(1000)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
 pygame.quit()
 quit()
