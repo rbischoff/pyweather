@@ -116,4 +116,5 @@ wu_wind_dirs = {
     'WSW': 'sw'
 }
 
+# Feel free to just add your api key here, just don't push it to remote repos like I did.  I had to change my key.
 api_key = api.key
