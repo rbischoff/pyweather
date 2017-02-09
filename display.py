@@ -580,19 +580,6 @@ class DisplayDriver:
                         running = False
 
 
-# Test block.  ditch this when done building the display
-
-day_list = ['Today', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-wind_dir = ['N', 'E', 'W', 'S', 'NE', 'NW', 'SE', 'SW', 'NNE', 'ENE', 'NNW', 'WNW', 'SSE', 'ESE', 'SSW', 'WSW']
-
-
-#for i in range(5):
-#    low = randint(0, 90)
-#    day = new_display._system_data.forecasts.forecasts[i]
-#    day.update_day(day=day_list[i], low_temp=str(low), high_temp=str(randint(low, 90)), feels_like=str(randint(0, 90)),
-#                   icon=randint(0, 47), wind_speed=str(randint(0, 30)), bara=str(randint(0, 30)),
-#                   wind_dir=wind_dir[randint(0, 15)], rain=str(randint(0, 100)))
-
 disp = DisplayDriver()
 disp.update_daily_data()
 disp.update_current_data()
