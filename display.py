@@ -246,9 +246,10 @@ class DisplayDriver:
         mph = font.render('mph', True, self._line_color)
         speed = lgfont.render(self._system_data.ws.wind_speed['current'], True, self._line_color)
         wd = self._system_data.wind_dirs[self._system_data.ws.wind_direction]
+        wf = self._system_data.ws.wind_power
 
         icon = pygame.image.load_extended(self._base_dir +
-                                          'compass/{}_calm.png'.format(wd)).convert_alpha()
+                                          'compass/{}_{}.png'.format(wd, wf)).convert_alpha()
 
         (ix, iy) = icon.get_size()
         (sx, sy) = speed.get_size()

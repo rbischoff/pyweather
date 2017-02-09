@@ -22,6 +22,7 @@ class WeatherStation:
         self.wind_direction_deg = {'current': '0',  'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
         self.wind_direction = 'North'
         self.wind_gust = '0'
+        self.wind_power = 'calm'
         self.wind_avg = '0'
         self.lumen = '0'
         self.heat_index = '0'
@@ -29,6 +30,16 @@ class WeatherStation:
 
     def get_wind_direction(self):
         pass
+
+    def wind_factor(self):
+        if self.wind_speed < 11:
+            self.wind_power = 'calm'
+        elif self.wind_speed < 28:
+            self.wind_power = 'mild'
+        elif self.wind_power < 49:
+            self.wind_power = 'heavy'
+        else:
+            self.wind_power = 'severe'
 
     def update_station(self, daily_flush=False):
         if daily_flush:
