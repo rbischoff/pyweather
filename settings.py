@@ -1,3 +1,4 @@
+import api
 sd = 'forecast/'  # Icon sub-directory name.
 
 # The forcast includes an icon index number.  Below is an ordered array that has the
@@ -66,31 +67,54 @@ icons = [
 ]
 
 wu_forecasts = {
-    'Chance of Flurries': sd + 'chanceflurries.png',
-    'Chance of Rain': sd + 'chancerain.png',
-    'Chance Rain': sd + 'chancerain.png',
-    'Chance of Freezing Rain': sd + 'chancesleet.png',
-    'Chance of Sleet': sd + 'chancesleet.png',
-    'Chance of Snow': sd + 'chancesnow.png',
-    'Chance of Thunderstorms': sd + 'chancetstorms.png',
-    'Chance of a Thunderstorm':	sd + 'chancetstorms.png',
-    'Clear': sd + 'clear.plg',
-    'Cloudy': sd + 'cloudy.png',
-    'Flurries': sd + 'flurries.png',
-    'Fog': sd + 'fog.png',
-    'Haze': sd + 'hazy.png',
-    'Mostly Cloudy': sd + 'mostlycloudy.png',
-    'Mostly Sunny': sd + 'mostlysunny.png',
-    'Partly Cloudy': sd + 'partlycloudy.png',
-    'Partly Sunny': sd + 'partlysunny.png',
-    'Freezing Rain': sd + 'sleet.png',
-    'Rain': sd + 'rain.png',
-    'Sleet': sd + 'sleet.png',
-    'Snow': sd + 'snow.png',
-    'Sunny': sd + 'sunny.png',
-    'Thunderstorms': sd + 'thunderstorm.png',
-    'Thunderstorm': sd + 'thunderstorm.png',
-    'Unknown': sd + 'unknown.png',
-    'Overcast':	 sd + 'cloudy.png',
-    'Scattered Clouds': sd + 'partlycloudy.png'
+    'chanceofflurries': sd + 'chanceflurries.png',
+    'chanceofrain': sd + 'chancerain.png',
+    'chancerain': sd + 'chancerain.png',
+    'chancefreezingrain': sd + 'chancesleet.png',
+    'chanceofsleet': sd + 'chancesleet.png',
+    'chanceofsnow': sd + 'chancesnow.png',
+    'chanceofthunderstorms': sd + 'chancetstorms.png',
+    'chanceofathunderstorm':	sd + 'chancetstorms.png',
+    'clear': sd + 'clear.png',
+    'cloudy': sd + 'cloudy.png',
+    'flurries': sd + 'flurries.png',
+    'fog': sd + 'fog.png',
+    'haze': sd + 'hazy.png',
+    'mostlycloudy': sd + 'mostlycloudy.png',
+    'mostlysunny': sd + 'mostlysunny.png',
+    'partlycloudy': sd + 'partlycloudy.png',
+    'partlysunny': sd + 'partlysunny.png',
+    'freezingrain': sd + 'sleet.png',
+    'rain': sd + 'rain.png',
+    'sleet': sd + 'sleet.png',
+    'snow': sd + 'snow.png',
+    'sunny': sd + 'sunny.png',
+    'thunderstorms': sd + 'thunderstorm.png',
+    'thunderstorm': sd + 'thunderstorm.png',
+    'unknown': sd + 'unknown.png',
+    'overcast':	 sd + 'cloudy.png',
+    'scatteredclouds': sd + 'partlycloudy.png'
 }
+
+wu_wind_dirs = {
+    'East': 'e',
+    'ENE': 'ne',
+    'ESE': 'se',
+    'NE': 'ne',
+    'NNE': 'ne',
+    'NNW':	'nw',
+    'North': 'n',
+    'NW': 'nw',
+    'SE': 'se',
+    'South': 's',
+    'SSE': 's',
+    'SSW':	'sw',
+    'SW': 'sw',
+    'Variable' : 'n',
+    'West': 'w',
+    'WNW': 'nw',
+    'WSW': 'sw'
+}
+
+# Feel free to just add your api key here, just don't push it to remote repos like I did.  I had to change my key.
+api_key = api.key
