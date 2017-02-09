@@ -1,3 +1,4 @@
+import api
 sd = 'forecast/'  # Icon sub-directory name.
 
 # The forcast includes an icon index number.  Below is an ordered array that has the
@@ -114,3 +115,5 @@ wu_wind_dirs = {
     'WNW': 'nw',
     'WSW': 'sw'
 }
+
+api_key = api.key

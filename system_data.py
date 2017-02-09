@@ -1,4 +1,4 @@
-from weather import WeatherStation, WeatherForecasts
+from weather import WeatherStation, WeatherForecasts, IndoorSensor
 import settings
 import time
 
@@ -11,3 +11,4 @@ class SystemData:
         self.weather_icons = settings.wu_forecasts
         self.wind_dirs = settings.wu_wind_dirs
         self.current_date = time.strftime("%d/%m")
+        self.indoor = IndoorSensor()

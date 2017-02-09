@@ -1,9 +1,20 @@
 import json
 import requests
+from settings import api_key
 
 
 def mean(numbers):
     return int(sum(numbers) / max(len(numbers), 1))
+
+
+class IndoorSensor:
+    def __init__(self):
+        self.temp_f = '0'
+        self.temp_c = '0'
+        self.humidity = '0'
+
+    def update_indoor(self):
+        pass
 
 
 class WeatherStation:
@@ -46,8 +57,8 @@ class WeatherStation:
             self._wind_speeds = []
 
         r = requests.post(
-            'http://api.wunderground.com/api/add326d1e4c43c31/'
-            'conditions/q/{}/{}.json'.format(self._state, self._city))
+            'http://api.wunderground.com/api/{}/'
+            'conditions/q/{}/{}.json'.format(api_key, self._state, self._city))
         self._current_json = json.loads(r.content.decode())
 
         try:
@@ -127,8 +138,8 @@ class WeatherForecasts:
 
     def update_forecast_data(self):
         r = requests.post(
-            'http://api.wunderground.com/api/add326d1e4c43c31/'
-            'forecast10day/q/{}/{}.json'.format(self._state, self._city))
+            'http://api.wunderground.com/api/{}/'
+            'forecast10day/q/{}/{}.json'.format(api_key, self._state, self._city))
 
         self._json_forecasts = json.loads(r.content.decode())
         print(self._json_forecasts)

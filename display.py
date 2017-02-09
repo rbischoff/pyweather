@@ -273,8 +273,8 @@ class DisplayDriver:
         lgfont = pygame.font.SysFont(self._font, int(self._ymax * th), bold=1)
 
         name = font.render('Indoor', True, self._line_color)
-        temp = lgfont.render('{} f'.format('76' + chr(0x00B0)), True, self._line_color)
-        humid = lgfont.render('{}% RH'.format('34'), True, self._line_color)
+        temp = lgfont.render('{} f'.format(self._system_data.indoor.temp_f + chr(0x00B0)), True, self._line_color)
+        humid = lgfont.render('{}% RH'.format(self._system_data.indoor.humidity), True, self._line_color)
 
         (nx, ny) = name.get_size()
         (tx, ty) = temp.get_size()
@@ -403,8 +403,8 @@ class DisplayDriver:
         self._screen.blit(peak_wind, (lc - wpx / 2, yb - wpy))
         self._screen.blit(wind_avg_label, (rc - walx / 2, yt))
         self._screen.blit(wind_avg, (rc - wax / 2, yb - way))
-        self._screen.blit(mph, (lc + wpx - (mx / 2) + offset, yb - wpy))
-        self._screen.blit(mph, (rc + wax - (mx / 2) + offset, yb - way))
+        self._screen.blit(mph, (lc - (wpx / 2) + (mx / 2) + offset, yb - wpy))
+        self._screen.blit(mph, (rc - (wax / 2) + (mx / 2) + offset, yb - way))
 
     def __display_sensor_detail_data(self):
 
