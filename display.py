@@ -1,7 +1,6 @@
 import pygame
 import os
 import time
-from random import randint
 from system_data import SystemData
 from settings import ICON_BASE_DIR, ICON_DICTIONARY, ICON_TYPES, COMPASS_DIR
 
@@ -247,6 +246,7 @@ class DisplayDriver:
         speed = lgfont.render(self._system_data.ws.wind_speed['current'], True, self._line_color)
         wd = self._system_data.wind_dirs[self._system_data.ws.wind_direction]
         wf = self._system_data.ws.wind_power
+        print(wf)
 
         icon = pygame.image.load_extended(self._base_dir +
                                           'compass/{}_{}.png'.format(wd, wf)).convert_alpha()
@@ -403,8 +403,8 @@ class DisplayDriver:
         self._screen.blit(peak_wind, (lc - wpx / 2, yb - wpy))
         self._screen.blit(wind_avg_label, (rc - walx / 2, yt))
         self._screen.blit(wind_avg, (rc - wax / 2, yb - way))
-        self._screen.blit(mph, (lc - (wpx / 2) + (mx / 2) + offset, yb - wpy))
-        self._screen.blit(mph, (rc - (wax / 2) + (mx / 2) + offset, yb - way))
+        self._screen.blit(mph, (lc + (wpx / 2) + offset, yb - wpy))
+        self._screen.blit(mph, (rc + (wax / 2) + offset, yb - way))
 
     def __display_sensor_detail_data(self):
 
