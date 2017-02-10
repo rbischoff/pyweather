@@ -43,11 +43,11 @@ class WeatherStation:
         pass
 
     def wind_factor(self):
-        if self.wind_speed < 11:
+        if int(self.wind_speed['current']) < 11:
             self.wind_power = 'calm'
-        elif self.wind_speed < 28:
+        elif int(self.wind_speed['current']) < 28:
             self.wind_power = 'mild'
-        elif self.wind_power < 49:
+        elif int(self.wind_speed['current']) < 49:
             self.wind_power = 'heavy'
         else:
             self.wind_power = 'severe'
@@ -81,7 +81,7 @@ class WeatherStation:
         self.heat_index = str(self._current_json['current_observation']['heat_index_f'])
         self.wind_chill = str(self._current_json['current_observation']['windchill_f'])
         self.wind_gust = str(self._current_json['current_observation']['wind_gust_mph'])
-
+        self.wind_factor()
 
 class DayForecast:
     def __init__(self):
