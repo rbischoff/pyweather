@@ -4,7 +4,7 @@ from settings import api_key
 
 
 def mean(numbers):
-    return int(sum(numbers) / max(len(numbers), 1))
+    return float(sum(numbers) / max(len(numbers), 1))
 
 
 class IndoorSensor:
@@ -43,11 +43,11 @@ class WeatherStation:
         pass
 
     def wind_factor(self):
-        if int(self.wind_speed['current']) < 11.0:
+        if float(self.wind_speed['current']) < 11.0:
             self.wind_power = 'calm'
-        elif int(self.wind_speed['current']) < 28.0:
+        elif float(self.wind_speed['current']) < 28.0:
             self.wind_power = 'mild'
-        elif int(self.wind_speed['current']) < 49.0:
+        elif float(self.wind_speed['current']) < 49.0:
             self.wind_power = 'heavy'
         else:
             self.wind_power = 'severe'
@@ -75,18 +75,23 @@ class WeatherStation:
             # TODO: add a method for writing errors to a logfile.
             pass
 
-        self.wind_avg = str(mean(self._wind_speeds))
+        self.wind_avg = "{0:.1f}".format(mean(self._wind_speeds))
         self.temp['current'] = str(self._current_json['current_observation']['temp_f'])
         self.rain['current'] = str(self._current_json['current_observation']['precip_today_in'])
         self.baro['current'] = str(self._current_json['current_observation']['pressure_in'])
         self.humidity['current'] = str(self._current_json['current_observation']['relative_humidity'])
-        self.wind_speed['current'] = str(self._current_json['current_observation']['wind_mph'])
+        self.wind_speed['current'] = "%d" % self._current_json['current_observation']['wind_mph']
         self.wind_direction_deg['current'] = str(self._current_json['current_observation']['wind_degrees'])
         self.wind_direction = str(self._current_json['current_observation']['wind_dir'])
         self.heat_index = str(self._current_json['current_observation']['heat_index_f'])
         self.wind_chill = str(self._current_json['current_observation']['windchill_f'])
         self.wind_gust = str(self._current_json['current_observation']['wind_gust_mph'])
-        self.wind_factor()
+        try:
+            self.wind_factor()
+        except ValueError:
+            print("Something isn't right.")
+            # Todo: write to logfile.
+
 
 class DayForecast:
     def __init__(self):
