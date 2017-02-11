@@ -247,7 +247,6 @@ class DisplayDriver:
         speed = lgfont.render(self._system_data.ws.wind_speed['current'], True, self._line_color)
         wd = self._system_data.wind_dirs[self._system_data.ws.wind_direction]
         wf = self._system_data.ws.wind_power
-        print(wf)
 
         icon = pygame.image.load_extended(self._base_dir +
                                           'compass/{}_{}.png'.format(wd, wf)).convert_alpha()

@@ -43,11 +43,11 @@ class WeatherStation:
         pass
 
     def wind_factor(self):
-        if int(self.wind_speed['current']) < 11:
+        if int(self.wind_speed['current']) < 11.0:
             self.wind_power = 'calm'
-        elif int(self.wind_speed['current']) < 28:
+        elif int(self.wind_speed['current']) < 28.0:
             self.wind_power = 'mild'
-        elif int(self.wind_speed['current']) < 49:
+        elif int(self.wind_speed['current']) < 49.0:
             self.wind_power = 'heavy'
         else:
             self.wind_power = 'severe'
@@ -69,7 +69,12 @@ class WeatherStation:
 
         print(self._current_json)
 
-        self._wind_speeds.append(int(self._current_json['current_observation']['wind_mph']))
+        try:
+            self._wind_speeds.append(float(self._current_json['current_observation']['wind_mph']))
+        except ValueError:
+            # TODO: add a method for writing errors to a logfile.
+            pass
+
         self.wind_avg = str(mean(self._wind_speeds))
         self.temp['current'] = str(self._current_json['current_observation']['temp_f'])
         self.rain['current'] = str(self._current_json['current_observation']['precip_today_in'])
