@@ -9,4 +9,4 @@ You will need to install Pygame in your Python3 library.  The best way to do thi
 I would like to thank jimk3038 over at http://www.instructables.com/id/Raspberry-Pi-Internet-Weather-Station for his work on the Pi Internet Station.  It was the key inspiration and starter code I used to make this project possible.
  
 # Images
-All artwork except the weather station icon and wifi-status bars are original artwork.  You are free to use them in any way you see fit.  I will eventually upload the illustrator source file I used to draw them.  The other images are taken from freely available royalty-free sources. 
+All artwork, except the weather station icon and wifi-status bars, are original artwork.  You are free to use them in any way you see fit.  I will eventually upload the illustrator source file I used to draw them.  The other images are taken from freely available royalty-free sources. 
