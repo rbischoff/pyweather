@@ -578,12 +578,4 @@ class DisplayDriver:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
-
-
-disp = DisplayDriver()
-disp.update_daily_data()
-disp.update_current_data()
-disp.run()
-
-pygame.quit()
-quit()
+        pygame.quit()
