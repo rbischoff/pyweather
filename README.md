@@ -11,4 +11,4 @@ I would like to thank jimk3038 over at http://www.instructables.com/id/Raspberry
 # Images
 All artwork, except the weather station icon and wifi-status bars, are original artwork.  You are free to use them in any way you see fit.  I will eventually upload the illustrator source file I used to draw them.  The other images are taken from freely available royalty-free sources. 
 
-[url=https://ibb.co/h3yadv][img]https://preview.ibb.co/fVN1Jv/Screen_Shot_2017_02_11_at_10_36_41_AM.png[/img][/url]
+![Current View](https://preview.ibb.co/fVN1Jv/Screen_Shot_2017_02_11_at_10_36_41_AM.png "Current View")
