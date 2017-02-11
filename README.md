@@ -13,4 +13,5 @@ All artwork, except the weather station icon and wifi-status bars, are original 
 
 
 # Screenshot 
+### 1024X600
 ![Current View](https://preview.ibb.co/fVN1Jv/Screen_Shot_2017_02_11_at_10_36_41_AM.png "Current View")
