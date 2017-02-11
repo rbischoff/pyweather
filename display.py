@@ -6,7 +6,7 @@ from settings import ICON_BASE_DIR, ICON_DICTIONARY, ICON_TYPES, COMPASS_DIR
 
 DEFAULT_DRIVERS = ('fbcon', 'directfb', 'svgalib', 'Quartz')
 DEFAULT_SIZE = (1024, 600)
-DEFAULT_SCREEN = 'resizable'
+DEFAULT_SCREEN = 'full_screen'
 
 
 class DisplayDriver:
@@ -82,8 +82,9 @@ class DisplayDriver:
 
         self._screen.fill((0, 0, 0))
         pygame.font.init()
-        # TODO: Uncomment the mouse hider
-        # pygame.mouse.set_visible(0)
+
+        # Mouse hider -- Comment the next line to see mouse over the display
+        pygame.mouse.set_visible(0)
         pygame.display.update()
 
     def __draw_frames(self):
