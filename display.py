@@ -570,7 +570,7 @@ class DisplayDriver:
                 cnt = 0
                 self.update_current_data()
             if time.strftime("%d/%m") != self._system_data.current_date:
-                self._system_data.current_date = time.strftime("%d/%s")
+                self._system_data.current_date = time.strftime("%d/%m")
                 self.update_daily_data()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
