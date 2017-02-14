@@ -130,7 +130,7 @@ class DayForecast:
             self.vis = kwargs['vis']
         if 'gust' in kwargs:
             self.gust = kwargs['gust']
-        if 'wind_direction' in kwargs:
+        if 'wind_direction':
             self.wind_direction = kwargs['wind_direction']
         if 'rain' in kwargs:
             self.rain = kwargs['rain']
