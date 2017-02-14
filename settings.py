@@ -110,7 +110,7 @@ wu_wind_dirs = {
     'SSE': 's',
     'SSW':	'sw',
     'SW': 'sw',
-    'Variable' : 'n',
+    'Variable': 'n',
     'West': 'w',
     'WNW': 'nw',
     'WSW': 'sw'

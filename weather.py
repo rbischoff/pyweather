@@ -31,7 +31,7 @@ class WeatherStation:
         self.humidity = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
         self.wind_speed = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
         self.wind_direction_deg = {'current': '0',  'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
-        self.wind_direction = 'North'
+        self.wind_direction = 'unknown'
         self.wind_gust = '0'
         self.wind_power = 'calm'
         self.wind_avg = '0'
