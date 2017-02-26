@@ -1,4 +1,4 @@
-from weather import WeatherStation, WeatherForecasts, IndoorSensor
+from weather import WeatherStationWU, WeatherForecasts, IndoorSensor
 import settings
 import time
 
@@ -6,7 +6,7 @@ import time
 class SystemData:
 
     def __init__(self):
-        self.ws = WeatherStation()
+        self.ws = WeatherStationWU()
         self.forecasts = WeatherForecasts()
         self.weather_icons = settings.wu_forecasts
         self.wind_dirs = settings.wu_wind_dirs

@@ -17,7 +17,7 @@ class IndoorSensor:
         pass
 
 
-class WeatherStation:
+class WeatherStationWU:
     def __init__(self, state='MD', city='Fort_Meade'):
         self._state = state
         self._city = city
