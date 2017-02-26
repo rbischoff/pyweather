@@ -1,6 +1,7 @@
 import json
 import requests
 from settings import api_key
+from sensor import Sensor
 
 
 def mean(numbers):
