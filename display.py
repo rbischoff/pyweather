@@ -202,7 +202,7 @@ class DisplayDriver:
             vci = vc + (j * vdiff)
             today = self._system_data.forecasts.forecasts[j]
             header = font.render(today.day, True, self._line_color)
-            temps = font.render(today.low_temp + ' / ' + today.high_temp, True, self._line_color)
+            temps = font.render(today.high_temp + ' / ' + today.low_temp, True, self._line_color)
             rain = lgfont.render(today.rain + '%', True, self._line_color)
 
             icon_path = self._base_dir + 'forecast/unknown.png'
