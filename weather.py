@@ -93,7 +93,7 @@ class WeatherStationWU:
             # Todo: write to logfile.
 
 
-class WeatherStationWU:
+class WeatherStationSensor:
     def __init__(self):
         self._current_json = None
         self._wind_speeds = []
