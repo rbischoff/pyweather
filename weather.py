@@ -57,10 +57,15 @@ class WeatherStationWU:
         if daily_flush:
             self._wind_speeds = []
 
-        r = requests.post(
-            'http://api.wunderground.com/api/{}/'
-            'conditions/q/{}/{}.json'.format(api_key, self._state, self._city))
-        self._current_json = json.loads(r.content.decode())
+        try:
+            r = requests.post(
+                'http://api.wunderground.com/api/{}/'
+                'conditions/q/{}/{}.json'.format(api_key, self._state, self._city))
+            self._current_json = json.loads(r.content.decode())
+
+        except ConnectionError:
+            print("Connection Failed")
+            return
 
         try:
             self._current_json['current_observation']
