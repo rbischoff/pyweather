@@ -53,11 +53,15 @@ class Sensor:
         recent = ct - dt.timedelta(minutes=5)
         result = self._session.query(History).filter(History.date_time > recent).all()
         print(result)
+        return result
 
 if __name__ == '__main__':
     s = Sensor()
     s.update_history()
-    s.get_current()
+    res = s.get_current()
+    for r in res:
+        print(r.date_time)
+    print(res[-1].date_time)
     print(s.data)
 
 

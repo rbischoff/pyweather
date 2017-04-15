@@ -100,7 +100,8 @@ class WeatherStationWU:
 
 
 class WeatherStationSensor:
-    def __init__(self):
+    def __init__(self, sensor):
+        self._sensor = sensor
         self._current_json = None
         self._wind_speeds = []
         self.sig_strength = 2
@@ -133,7 +134,7 @@ class WeatherStationSensor:
             self.wind_power = 'severe'
 
     def update_station(self, daily_flush=False):
-        pass
+        data = self._sensor.get_current()
 
 class DayForecast:
     def __init__(self):
