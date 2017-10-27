@@ -560,7 +560,7 @@ class DisplayDriver:
     def update_current_data(self):
         self._system_data.ws.update_station()
 
-    def run(self):
+    def run(self, run_delay=209):
         cnt = 0
         self.display_start()
 
@@ -570,7 +570,7 @@ class DisplayDriver:
             pygame.time.wait(1000)
             self.update_diplay()
             cnt += 1
-            if cnt >= 209:
+            if cnt >= run_delay:
                 cnt = 0
                 self.update_current_data()
             if time.strftime("%d/%m") != self._system_data.current_date:

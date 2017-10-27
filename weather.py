@@ -2,10 +2,24 @@ import json
 import requests
 from settings import api_key
 from sensor import Sensor
+import time
 
 
 def mean(numbers):
     return float(sum(numbers) / max(len(numbers), 1))
+
+
+def convert_sig(rssi):
+    if rssi > -50:
+        return 4
+    elif -51 > rssi > -65:
+        return 3
+    elif -66 > rssi > -80:
+        return 2
+    elif -81 > rssi > -95:
+        return 1
+    else:
+        return 0
 
 
 class IndoorSensor:
@@ -104,7 +118,7 @@ class WeatherStationSensor:
         self._sensor = sensor
         self._current_json = None
         self._wind_speeds = []
-        self.sig_strength = 2
+        self.sig_strength = 0
         self._wind_directions = ['n', 's', 'e', 'w', 'ne', 'se', 'nw', 'sw']
         self.temp = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
         self.rain = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
@@ -120,10 +134,14 @@ class WeatherStationSensor:
         self.heat_index = '0'
         self.wind_chill = '0'
 
-    def get_wind_direction(self):
-        pass
+    def _update_wind_direction(self):
+        wind_dirs = {'0.0': 'n', '180.0': 's', '90.0': 'e', '270.0': 'w', '45.0': 'ne', '135.0': 'se', '225.0': 'sw',
+                     '315.0': 'nw', '23.0': 'ne', '68.0': 'ne', '113.0': 'se', '158.0': 'se', '203.0': 'sw',
+                     '248.0': 'sw', '293.0': 'nw', '338.0': 'nw'}
+        if str(self.wind_direction_deg['current']) in wind_dirs:
+            self.wind_direction = wind_dirs[str(self.wind_direction_deg['current'])]
 
-    def wind_factor(self):
+    def _update_wind_factor(self):
         if float(self.wind_speed['current']) < 11.0:
             self.wind_power = 'calm'
         elif float(self.wind_speed['current']) < 28.0:
@@ -133,8 +151,26 @@ class WeatherStationSensor:
         else:
             self.wind_power = 'severe'
 
-    def update_station(self, daily_flush=False):
+    def update_station(self, verbose=False):
+        self._sensor.update_history()
         data = self._sensor.get_current()
+        if data:
+            self.sig_strength = convert_sig(data.sig_strength)
+            self.temp['current'] = str(data.temp)
+            self.rain['current'] = str(data.rain)
+            self.baro['current'] = str(data.baro)
+            self.humidity['current'] = str(data.humidity)
+            self.wind_speed['current'] = str(data.wind_speed)
+            self.wind_direction_deg['current'] = str(data.wind_direction_deg)
+            self.lumen = str(data.lumen)
+            self._update_wind_direction()
+            self._update_wind_factor()
+
+        if verbose:
+            print((self.sig_strength, self.temp['current'], self.rain['current'], self.baro['current'],
+                   self.humidity['current'], self.wind_speed['current'], self.wind_direction_deg['current'],
+                   self.wind_direction, self.wind_power, self.lumen))
+
 
 class DayForecast:
     def __init__(self):
@@ -182,7 +218,7 @@ class DayForecast:
 
 
 class WeatherForecasts:
-    def __init__(self, days=5, state='MD', city='Fort_Meade'):
+    def __init__(self, days=5, state='MD', city='Odenton'):
         self._days = days
         self._state = state
         self._city = city
@@ -205,3 +241,11 @@ class WeatherForecasts:
                 high_temp=self._json_forecasts['forecast']['simpleforecast']['forecastday'][i]['high']['fahrenheit'],
                 rain=str(self._json_forecasts['forecast']['simpleforecast']['forecastday'][i]['pop']),
                 icon=self._json_forecasts['forecast']['simpleforecast']['forecastday'][i]['icon'])
+
+
+if __name__ == '__main__':
+    s = Sensor(address=('192.168.0.107', 7001))
+    ws = WeatherStationSensor(sensor=s)
+    while True:
+        ws.update_station(verbose=True)
+        time.sleep(1)
