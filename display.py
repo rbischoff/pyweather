@@ -6,7 +6,7 @@ from settings import ICON_BASE_DIR, ICON_DICTIONARY, ICON_TYPES, COMPASS_DIR
 
 DEFAULT_DRIVERS = ('fbcon', 'directfb', 'svgalib', 'Quartz')
 DEFAULT_SIZE = (1024, 600)
-DEFAULT_SCREEN = 'full_screen'
+DEFAULT_SCREEN = 'resizable'
 
 
 class DisplayDriver:
@@ -167,6 +167,7 @@ class DisplayDriver:
         signal_scale = 0.25
 
         station_icon = pygame.image.load_extended(self._base_dir + self._icons['weather_station']).convert_alpha()
+
         signal_icon = pygame.image.load_extended(self.__get_signal_icon()).convert_alpha()
         (stix, stiy) = station_icon.get_size()
         (sgix, sgiy) = signal_icon.get_size()
@@ -560,7 +561,7 @@ class DisplayDriver:
     def update_current_data(self):
         self._system_data.ws.update_station()
 
-    def run(self):
+    def run(self, run_delay=209):
         cnt = 0
         self.display_start()
 
@@ -570,7 +571,7 @@ class DisplayDriver:
             pygame.time.wait(1000)
             self.update_diplay()
             cnt += 1
-            if cnt >= 209:
+            if cnt >= run_delay:
                 cnt = 0
                 self.update_current_data()
             if time.strftime("%d/%m") != self._system_data.current_date:
