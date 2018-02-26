@@ -33,7 +33,7 @@ class IndoorSensor:
 
 
 class WeatherStationWU:
-    def __init__(self, state='MD', city='Fort_Meade'):
+    def __init__(self, state='MD', city='Odenton'):
         self._state = state
         self._city = city
         self._current_json = None
@@ -120,19 +120,19 @@ class WeatherStationSensor:
         self._wind_speeds = []
         self.sig_strength = 0
         self._wind_directions = ['n', 's', 'e', 'w', 'ne', 'se', 'nw', 'sw']
-        self.temp = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
-        self.rain = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
-        self.baro = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
-        self.humidity = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
-        self.wind_speed = {'current': '0', 'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
-        self.wind_direction_deg = {'current': '0',  'hour': '0', 'day': '0', 'week': '0', 'month': '0', 'year': '0'}
-        self.wind_direction = 'unknown'
-        self.wind_gust = '0'
-        self.wind_power = 'calm'
-        self.wind_avg = '0'
-        self.lumen = '0'
-        self.heat_index = '0'
-        self.wind_chill = '0'
+        self.temp = {'current': '-', 'hour': '-', 'day': '-', 'week': '-', 'month': '-', 'year': '-'}
+        self.rain = {'current': '-', 'hour': '-', 'day': '-', 'week': '-', 'month': '-', 'year': '-'}
+        self.baro = {'current': '-', 'hour': '-', 'day': '-', 'week': '-', 'month': '-', 'year': '-'}
+        self.humidity = {'current': '-', 'hour': '-', 'day': '-', 'week': '-', 'month': '-', 'year': '-'}
+        self.wind_speed = {'current': '-', 'hour': '-', 'day': '-', 'week': '-', 'month': '-', 'year': '-'}
+        self.wind_direction_deg = {'current': '-',  'hour': '-', 'day': '-', 'week': '-', 'month': '-', 'year': '-'}
+        self.wind_direction = 'UKN'
+        self.wind_gust = '-'
+        self.wind_power = '--'
+        self.wind_avg = '-'
+        self.lumen = '-'
+        self.heat_index = '-'
+        self.wind_chill = '-'
 
     def _update_wind_direction(self):
         wind_dirs = {'0.0': 'n', '180.0': 's', '90.0': 'e', '270.0': 'w', '45.0': 'ne', '135.0': 'se', '225.0': 'sw',
@@ -167,9 +167,10 @@ class WeatherStationSensor:
             self._update_wind_factor()
 
         if verbose:
-            print((self.sig_strength, self.temp['current'], self.rain['current'], self.baro['current'],
-                   self.humidity['current'], self.wind_speed['current'], self.wind_direction_deg['current'],
-                   self.wind_direction, self.wind_power, self.lumen))
+            if data:
+                print((self.sig_strength, self.temp['current'], self.rain['current'], self.baro['current'],
+                       self.humidity['current'], self.wind_speed['current'], self.wind_direction_deg['current'],
+                       self.wind_direction, self.wind_power, self.lumen))
 
 
 class DayForecast:
@@ -226,12 +227,20 @@ class WeatherForecasts:
         self.forecasts = [DayForecast() for _ in range(days)]
 
     def update_forecast_data(self):
-        r = requests.post(
-            'http://api.wunderground.com/api/{}/'
-            'forecast10day/q/{}/{}.json'.format(api_key, self._state, self._city))
 
-        self._json_forecasts = json.loads(r.content.decode())
-        print(self._json_forecasts)
+        try:
+            r = requests.post(
+                'http://api.wunderground.com/api/{}/'
+                'forecast10day/q/{}/{}.json'.format(api_key, self._state, self._city))
+        except ConnectionError or ConnectionResetError:
+            r = None
+
+        try:
+            if r:
+                self._json_forecasts = json.loads(r.content.decode())
+                print(self._json_forecasts)
+        except ValueError or TypeError:
+            pass
 
     def update_forecasts(self):
         for i, forecast in enumerate(self.forecasts):

@@ -39,15 +39,16 @@ class Sensor:
         session = sessionmaker()
         session.configure(bind=self._engine)
         self._session = session()
+        self._conn = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        fcntl.fcntl(self._conn, fcntl.F_SETFL, os.O_NONBLOCK)
+        self._conn.bind(self._addr)
         # self.data = json.loads(self._json)
 
     def fetch_data(self):
-        conn = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        fcntl.fcntl(conn, fcntl.F_SETFL, os.O_NONBLOCK)
         # conn.connect(self._addr)
         # conn.send(b'\n')
         # conn.settimeout(5.0)
-        conn.bind(self._addr)
+
         # term = '\r\n'
         # h_str = ''
         # while term not in h_str:
@@ -72,17 +73,17 @@ class Sensor:
         #     j_str += j.decode()
         j_str = ''
         try:
-            j_str += conn.recv(1024)
-            conn.close()
+            j_str += self._conn.recv(1024).decode()
+            # conn.close()
         except socket.error as e:
-            conn.close()
+            # conn.close()
             err = e.args[0]
             if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
                 pass
             else:
                 print(e)
                 return None
-        conn.close()
+        # conn.close()
         self._json = j_str
         if self._json:
             try:
@@ -96,6 +97,7 @@ class Sensor:
 
     def update_history(self):
         if self.fetch_data():
+            print(self.data)
             hist = History(date_time=dt.datetime.now(), sig_strength=self.data['RSSI'], temp=self.data['Temperature'],
                            rain=self.data['Rain'], baro=self.data['Pressure'], humidity=self.data['Humidity'],
                            wind_speed=self.data['Wind Speed'], wind_direction_deg=self.data['Direction'],
@@ -115,7 +117,7 @@ class Sensor:
 
 
 if __name__ == '__main__':
-    s = Sensor(address=('', 7001))
+    s = Sensor(address=('192.168.0.255', 7001))
     t1 = threading.Thread(target=s.update_history)
     t1.run()
     while True:
