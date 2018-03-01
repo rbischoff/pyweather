@@ -77,6 +77,10 @@ class WeatherStationWU:
                 'conditions/q/{}/{}.json'.format(api_key, self._state, self._city))
             self._current_json = json.loads(r.content.decode())
 
+        except ValueError:
+            print("Malformed or Empty Response")
+            return
+
         except ConnectionError:
             print("Connection Failed")
             return
