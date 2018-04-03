@@ -3,6 +3,7 @@ import requests
 from settings import api_key
 from sensor import Sensor
 import time
+from requests.exceptions import ConnectionError
 
 
 def mean(numbers):
@@ -77,13 +78,13 @@ class WeatherStationWU:
                 'conditions/q/{}/{}.json'.format(api_key, self._state, self._city))
             self._current_json = json.loads(r.content.decode())
 
-        except ValueError:
+        except ValueError as e:
             print("Malformed or Empty Response")
             return
 
-        except ConnectionError:
-            print("Connection Failed")
-            return
+        except ConnectionError as e:
+            print("Connection Failed - {}".format(str(e)))
+            raise ConnectionError
 
         try:
             self._current_json['current_observation']
@@ -98,18 +99,20 @@ class WeatherStationWU:
         except ValueError:
             # TODO: add a method for writing errors to a logfile.
             pass
-
-        self.wind_avg = "{0:.1f}".format(mean(self._wind_speeds))
-        self.temp['current'] = str(self._current_json['current_observation']['temp_f'])
-        self.rain['current'] = str(self._current_json['current_observation']['precip_today_in'])
-        self.baro['current'] = str(self._current_json['current_observation']['pressure_in'])
-        self.humidity['current'] = str(self._current_json['current_observation']['relative_humidity'])
-        self.wind_speed['current'] = "%d" % self._current_json['current_observation']['wind_mph']
-        self.wind_direction_deg['current'] = str(self._current_json['current_observation']['wind_degrees'])
-        self.wind_direction = str(self._current_json['current_observation']['wind_dir'])
-        self.heat_index = str(self._current_json['current_observation']['heat_index_f'])
-        self.wind_chill = str(self._current_json['current_observation']['windchill_f'])
-        self.wind_gust = str(self._current_json['current_observation']['wind_gust_mph'])
+        try:
+            self.wind_avg = "{0:.1f}".format(mean(self._wind_speeds))
+            self.temp['current'] = str(self._current_json['current_observation']['temp_f'])
+            self.rain['current'] = str(self._current_json['current_observation']['precip_today_in'])
+            self.baro['current'] = str(self._current_json['current_observation']['pressure_in'])
+            self.humidity['current'] = str(self._current_json['current_observation']['relative_humidity'])
+            self.wind_speed['current'] = "%d" % self._current_json['current_observation']['wind_mph']
+            self.wind_direction_deg['current'] = str(self._current_json['current_observation']['wind_degrees'])
+            self.wind_direction = str(self._current_json['current_observation']['wind_dir'])
+            self.heat_index = str(self._current_json['current_observation']['heat_index_f'])
+            self.wind_chill = str(self._current_json['current_observation']['windchill_f'])
+            self.wind_gust = str(self._current_json['current_observation']['wind_gust_mph'])
+        except TypeError:
+            print("No Update Made")
         try:
             self.wind_factor()
         except ValueError:
@@ -236,8 +239,10 @@ class WeatherForecasts:
             r = requests.post(
                 'http://api.wunderground.com/api/{}/'
                 'forecast10day/q/{}/{}.json'.format(api_key, self._state, self._city))
-        except ConnectionError or ConnectionResetError:
-            r = None
+        except ConnectionError:
+            raise ConnectionError
+        except ConnectionResetError:
+            return
 
         try:
             if r:
@@ -247,6 +252,12 @@ class WeatherForecasts:
             pass
 
     def update_forecasts(self):
+        try:
+            test = self._json_forecasts['forecast']['simpleforecast']['forecastday']
+        except KeyError or TypeError:
+            print("Empty Forecast Set or Malformed Data")
+            return
+
         for i, forecast in enumerate(self.forecasts):
             forecast.update_day(
                 day=self._json_forecasts['forecast']['simpleforecast']['forecastday'][i]['date']['weekday'],

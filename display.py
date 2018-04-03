@@ -1,6 +1,7 @@
 import pygame
 import os
 import time
+from requests.exceptions import ConnectionError
 from system_data import SystemData
 from settings import ICON_BASE_DIR, ICON_DICTIONARY, ICON_TYPES, COMPASS_DIR
 
@@ -209,8 +210,6 @@ class DisplayDriver:
             icon_path = self._base_dir + 'forecast/unknown.png'
             if today.icon in self._system_data.weather_icons:
                 icon_path = self._base_dir + self._system_data.weather_icons[today.icon]
-            else:
-                print(today.icon + ' unknown')
 
             icon = pygame.image.load_extended(icon_path)
 
@@ -555,14 +554,20 @@ class DisplayDriver:
             print("Update Error + {}".format(str(err)))
 
     def update_daily_data(self):
-        self._system_data.forecasts.update_forecast_data()
-        self._system_data.forecasts.update_forecasts()
+        try:
+            self._system_data.forecasts.update_forecast_data()
+            self._system_data.forecasts.update_forecasts()
+        except ConnectionError as e:
+            raise ConnectionError(e)
 
     def update_current_data(self):
-        self._system_data.ws.update_station()
+        try:
+            self._system_data.ws.update_station()
+        except ConnectionError as e:
+            raise ConnectionError(e)
 
     def run(self, run_delay=209):
-        cnt = 0
+        cnt = run_delay
         self.display_start()
 
         running = True
@@ -572,11 +577,19 @@ class DisplayDriver:
             self.update_diplay()
             cnt += 1
             if cnt >= run_delay:
-                cnt = 0
-                self.update_current_data()
+                try:
+                    self.update_current_data()
+                    cnt = 0
+                except ConnectionError as e:
+                    print("No connection on current data update")
+                    cnt = run_delay
             if time.strftime("%d/%m") != self._system_data.current_date:
-                self._system_data.current_date = time.strftime("%d/%m")
-                self.update_daily_data()
+                try:
+                    self.update_daily_data()
+                    self._system_data.current_date = time.strftime("%d/%m")
+                except ConnectionError as e:
+                    self._system_data.current_date = None
+                    print("No connection on daily data update.")
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
