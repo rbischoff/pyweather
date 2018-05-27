@@ -14,8 +14,12 @@ CMD_SOFT_RESET = b"\xFE"
 
 class HTU21D(object):
     def __init__(self):
-        self.dev = i2c_base.i2c(HTU21D_ADDR, 1)  # HTU21D 0x40, bus 1
-        self.dev.write(CMD_SOFT_RESET)  # Soft reset
+        try:
+            self.dev = i2c_base.i2c(HTU21D_ADDR, 1)  # HTU21D 0x40, bus 1
+            self.dev.write(CMD_SOFT_RESET)  # Soft reset
+        except OSError as e:
+            print("Error Opening or writing to i2c: {}".format(str(e)))
+            self.dev = None
         time.sleep(.1)
 
     def ctemp(self, sensor_temp):
@@ -41,7 +45,7 @@ class HTU21D(object):
         divisor = 0x988000
 
         for i in range(0, 16):
-            if(remainder & 1 << (23 - i)):
+            if remainder & 1 << (23 - i):
                 remainder ^= divisor
             divisor = divisor >> 1
 
@@ -51,35 +55,53 @@ class HTU21D(object):
             return False
 
     def read_temperature(self):
-        self.dev.write(CMD_READ_TEMP_NOHOLD)  # Measure temp
-        time.sleep(.1)
-        data = self.dev.read(3)
-        buf = array.array('B', data)
-        if self.crc8check(buf):
-            temp = (buf[0] << 8 | buf[1]) & 0xFFFC
-            return self.ctemp(temp)
-        else:
+        try:
+            self.dev.write(CMD_READ_TEMP_NOHOLD)  # Measure temp
+            time.sleep(.1)
+            data = self.dev.read(3)
+            buf = array.array('B', data)
+            if self.crc8check(buf):
+                temp = (buf[0] << 8 | buf[1]) & 0xFFFC
+                return self.ctemp(temp)
+            else:
+                return -255
+        except OSError as e:
+            print("Error reading temp: {}".format(str(e)))
+            return -255
+        except AttributeError as e:
+            print("Sensor not initialized: {}".format(str(e)))
+            self.__init__()
             return -255
 
     def read_humidity(self):
         temp_actual = self.read_temperature()  # For temperature coefficient compensation
-        self.dev.write(CMD_READ_HUM_NOHOLD)  # Measure humidity
-        time.sleep(.1)
-        data = self.dev.read(3)
-        buf = array.array('B', data)
 
-        if self.crc8check(buf):
-            humid = (buf[0] << 8 | buf[1]) & 0xFFFC
-            rh_actual = self.chumid(humid)
+        try:
+            self.dev.write(CMD_READ_HUM_NOHOLD)  # Measure humidity
+            time.sleep(.1)
+            data = self.dev.read(3)
+            buf = array.array('B', data)
 
-            rh_final = self.temp_coefficient(rh_actual, temp_actual)
+            if self.crc8check(buf):
+                humid = (buf[0] << 8 | buf[1]) & 0xFFFC
+                rh_actual = self.chumid(humid)
 
-            rh_final = 100.0 if rh_final > 100 else rh_final  # Clamp > 100
-            rh_final = 0.0 if rh_final < 0 else rh_final  # Clamp < 0
+                rh_final = self.temp_coefficient(rh_actual, temp_actual)
 
-            return rh_final
-        else:
+                rh_final = 100.0 if rh_final > 100 else rh_final  # Clamp > 100
+                rh_final = 0.0 if rh_final < 0 else rh_final  # Clamp < 0
+
+                return rh_final
+            else:
+                return -255
+        except OSError as e:
+            print("Error reading humidity: {}".format(str(e)))
             return -255
+        except AttributeError as e:
+            print("Sensor not initialized: {}".format(str(e)))
+            self.__init__()
+            return -255
+
 
 if __name__ == "__main__":
     obj = HTU21D()
