@@ -266,7 +266,7 @@ class DisplayDriver:
         self._screen.blit(mph, (vc - mx / 2, yc + (sy / 2) - (my / 2)))
 
     def __display_indoor(self):
-        offset = self._ymax * .09
+        offset = self._ymax * .03
         yb = self._ymax * 0.58
         yt = self._ymax * 0.5
         xc = (self._xmax * 0.33) / 2
