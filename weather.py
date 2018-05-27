@@ -3,6 +3,7 @@ import requests
 from settings import api_key
 from sensor import Sensor
 import time
+import htu
 from requests.exceptions import ConnectionError
 
 
@@ -25,12 +26,17 @@ def convert_sig(rssi):
 
 class IndoorSensor:
     def __init__(self):
+        self.indoor_sensor = htu.HTU21D()
         self.temp_f = '0'
         self.temp_c = '0'
+        self.temp_c_raw = 0
         self.humidity = '0'
 
     def update_indoor(self):
-        pass
+        self.temp_c_raw = self.indoor_sensor.read_humidity()
+        self.temp_c = str(self.temp_c_raw)
+        self.temp_f = str(self.temp_c_raw * 1.8 + 32)
+        self.humidity = str(self.indoor_sensor.read_humidity())
 
 
 class WeatherStationWU:

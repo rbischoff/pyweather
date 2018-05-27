@@ -4,6 +4,7 @@ import time
 from requests.exceptions import ConnectionError
 from system_data import SystemData
 from settings import ICON_BASE_DIR, ICON_DICTIONARY, ICON_TYPES, COMPASS_DIR
+import threading
 
 DEFAULT_DRIVERS = ('fbcon', 'directfb', 'svgalib', 'Quartz')
 DEFAULT_SIZE = (1024, 600)
@@ -44,6 +45,7 @@ class DisplayDriver:
         self._av_time = 1
         self._screen = None
         self._blits = []
+        self.running = True
 
     def __append_blits(self, blits):
 
@@ -532,7 +534,7 @@ class DisplayDriver:
             self.__draw_screen()
 
         except AssertionError as err:
-            print(err)
+            print(str(err))
             quit()
 
     def update_diplay(self):
@@ -566,11 +568,14 @@ class DisplayDriver:
         except ConnectionError as e:
             raise ConnectionError(e)
 
-    def run(self, run_delay=209):
-        cnt = run_delay
-        self.display_start()
+    def update_indoor_data(self, running):
+        while running:
+            self._system_data.indoor.update_indoor()
+            pygame.time.wait(5000)
 
-        running = True
+    def main_loop(self, run_delay, running):
+        cnt = run_delay
+
         while running:
 
             pygame.time.wait(1000)
@@ -596,4 +601,17 @@ class DisplayDriver:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
+
+    def run(self, run_delay=209):
+
+        self.display_start()
+        running = True
+        t1 = threading.Thread(target=self.update_indoor_data, args=(running,))
+        t2 = threading.Thread(target=self.main_loop, args=(run_delay, running,))
+
+        t1.start()
+        t2.start()
+
+        t1.join()
+        t2.join()
         pygame.quit()
