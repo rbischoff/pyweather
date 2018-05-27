@@ -34,9 +34,9 @@ class IndoorSensor:
 
     def update_indoor(self):
         self.temp_c_raw = self.indoor_sensor.read_humidity()
-        self.temp_c = str(self.temp_c_raw)
-        self.temp_f = str(self.temp_c_raw * 1.8 + 32)
-        self.humidity = str(self.indoor_sensor.read_humidity())
+        self.temp_c = "{:10.1f}".format(self.temp_c_raw)
+        self.temp_f = "{:10.1f}".format(self.temp_c_raw * 1.8 + 32)
+        self.humidity = "{:10.1f}".format(self.indoor_sensor.read_humidity())
 
 
 class WeatherStationWU:
