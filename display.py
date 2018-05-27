@@ -568,9 +568,14 @@ class DisplayDriver:
         except ConnectionError as e:
             raise ConnectionError(e)
 
-    def update_indoor_data(self):
+    def update_indoor_data(self, interval):
+        cnt = interval
         while self.running:
-            self._system_data.indoor.update_indoor()
+            if cnt == interval:
+                self._system_data.indoor.update_indoor()
+                cnt = 0
+            else:
+                cnt += 1
             pygame.time.wait(1000)
 
     def main_loop(self, run_delay):
@@ -600,13 +605,11 @@ class DisplayDriver:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
-            pygame.time.wait(1000)
 
-    def run(self, run_delay=209):
+    def run(self, run_delay=209, interval=60):
         self.display_start()
-        t1 = threading.Thread(target=self.update_indoor_data)
+        t1 = threading.Thread(target=self.update_indoor_data, args=(interval,))
         t1.start()
         self.main_loop(run_delay)
-
         t1.join()
         pygame.quit()
