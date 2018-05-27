@@ -568,16 +568,15 @@ class DisplayDriver:
         except ConnectionError as e:
             raise ConnectionError(e)
 
-    def update_indoor_data(self, running):
-        while running:
+    def update_indoor_data(self):
+        while self.running:
             self._system_data.indoor.update_indoor()
-            pygame.time.wait(5000)
+            pygame.time.wait(1000)
 
-    def main_loop(self, run_delay, running):
+    def main_loop(self, run_delay):
         cnt = run_delay
 
-        while running:
-
+        while self.running:
             pygame.time.wait(1000)
             self.update_diplay()
             cnt += 1
@@ -597,21 +596,17 @@ class DisplayDriver:
                     print("No connection on daily data update.")
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    self.running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        running = False
+                        self.running = False
+            pygame.time.wait(1000)
 
     def run(self, run_delay=209):
-
         self.display_start()
-        running = True
-        t1 = threading.Thread(target=self.update_indoor_data, args=(running,))
-        t2 = threading.Thread(target=self.main_loop, args=(run_delay, running,))
-
+        t1 = threading.Thread(target=self.update_indoor_data)
         t1.start()
-        t2.start()
+        self.main_loop(run_delay)
 
         t1.join()
-        t2.join()
         pygame.quit()
